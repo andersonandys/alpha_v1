@@ -26,14 +26,14 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
               height: 20,
             ),
             const Text(
-              'Reinitialisation mot de passe',
+              'Réinitialisation mot de passe',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(
               height: 20,
             ),
             const Text(
-              "Entrer votre adresse mail pour que nous puissions vous envoyer un lien pour restaurer votre mot de pass",
+              "Entrer votre adresse mail pour que nous puissions vous envoyer un lien pour restaurer votre mot de passe",
               style: TextStyle(
                 fontSize: 16,
               ),

@@ -1,3 +1,4 @@
+import 'package:alpha/screen/diffusion_screen.dart';
 import 'package:flutter/material.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -16,12 +17,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Tableau de bord',
           style: TextStyle(
             fontSize: 25,
             fontWeight: FontWeight.bold,
-            color: Colors.teal,
+            color: Colors.black.withBlue(30),
           ),
         ),
         centerTitle: true,
@@ -43,11 +44,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   3,
                   (index) => Container(
                     padding: const EdgeInsets.all(25),
-                    margin: const EdgeInsets.only(bottom: 5),
+                    margin: const EdgeInsets.only(bottom: 5, left: 10),
                     alignment: Alignment.center,
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: Colors.teal,
+                      color: Colors.black.withBlue(30),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Text(
@@ -72,7 +73,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   height: 10,
                   width: _currentIndex == index ? 20 : 10,
                   decoration: BoxDecoration(
-                    color: _currentIndex == index ? Colors.teal : Colors.grey,
+                    color: _currentIndex == index
+                        ? Colors.black.withBlue(30)
+                        : Colors.grey,
                     borderRadius: BorderRadius.circular(5),
                   ),
                 ),
@@ -127,7 +130,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(15),
               decoration: BoxDecoration(
-                color: Colors.teal,
+                color: Colors.black.withBlue(30),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
@@ -145,14 +148,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ),
                   const SizedBox(width: 25),
-                  const Text(
-                    "Emettre un Feedback",
-                    style: TextStyle(
-                      fontSize: 22,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (BuildContext context) =>
+                                  const DiffusionScreen(),
+                            ));
+                      },
+                      child: const Text(
+                        "Emettre un Feedback",
+                        style: TextStyle(
+                          fontSize: 22,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )),
                 ],
               ),
             ),
