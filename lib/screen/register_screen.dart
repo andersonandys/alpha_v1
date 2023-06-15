@@ -1,13 +1,10 @@
+import 'package:alpha/controllers/app_controler.dart';
 import 'package:alpha/screen/widgets/button_form_component.dart';
-import 'package:alpha/screen/widgets/text_form_field_widget.dart';
 import 'package:ficonsax/ficonsax.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
-
-import '../controllers/user_controller.dart';
-import 'dashboard_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -19,16 +16,10 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  // final FirebaseAuth _controllerFirebase = FirebaseAuth.instance;
-  final RoundedLoadingButtonController _buttonController =
-      RoundedLoadingButtonController();
-
-  // UserController _userC = UserController();
+  final FirebaseAuth _controllerFirebase = FirebaseAuth.instance;
 
   bool seePassword = false;
-
-  late String email, password;
-
+  final appControler = Get.put(AppControler());
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,6 +48,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       height: 10,
                     ),
                     TextFormField(
+                      controller: appControler.nomUser.value,
                       decoration: const InputDecoration(
                           suffixIcon: Icon(
                             IconsaxBold.user,
@@ -87,6 +79,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       height: 10,
                     ),
                     TextFormField(
+                      controller: appControler.mailUser.value,
                       decoration: const InputDecoration(
                           suffixIcon: Icon(
                             Icons.mail,
@@ -115,6 +108,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       height: 10,
                     ),
                     TextFormField(
+                      controller: appControler.password.value,
                       obscureText: seePassword,
                       style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(
@@ -151,6 +145,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       height: 10,
                     ),
                     TextFormField(
+                      controller: appControler.passwordConfitm.value,
                       obscureText: seePassword,
                       style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(
@@ -185,39 +180,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ComponentButtonForm(
                 label: "S'inscrire",
                 onPressed: () async {
-                  // FocusScope.of(context).unfocus();
-                  // _formKey.currentState!.save();
-                  // if (_formKey.currentState!.validate()) {
-                  //   _formKey.currentState!.save();
-                  //   _controllerFirebase
-                  //       .createUserWithEmailAndPassword(
-                  //           email: email, password: password)
-                  //       .then((value) async {
-                  //     _userC = context.read<UserController>();
-                  //     await _userC.initRegisterUserData(value.user);
-                  //     _buttonController.success();
-                  //     await Future.delayed(const Duration(seconds: 1))
-                  //         .then((value) => Navigator.pushAndRemoveUntil(
-                  //               context,
-                  //               MaterialPageRoute(
-                  //                   builder: (context) => DashboardScreen()),
-                  //               (route) => false,
-                  //             ));
-                  //   }).catchError((onError) async {
-                  //     _buttonController.error();
-                  //      ScaffoldMessenger.of(context).showSnackBar(
-                  //          ComponentErrorSnackBar(onError.code).build());
-
-                  //     await Future.delayed(const Duration(seconds: 2));
-                  //     _buttonController.reset();
-                  //   });
-                  // } else {
-                  //   _buttonController.error();
-                  //   await Future.delayed(const Duration(seconds: 3));
-                  //   _buttonController.reset();
-                  // }
+                  FocusScope.of(context).unfocus();
+                  appControler.creatcompte(context);
                 },
-                controller: _buttonController,
+                controller: appControler.buttonController.value,
               )
             ],
           ),

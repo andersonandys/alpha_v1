@@ -17,7 +17,7 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
         backgroundColor: Colors.green,
         title: const Text(
           'Diffusion',
-          style: TextStyle(color: Colors.white, fontSize: 20),
+          style: TextStyle(color: Colors.white, fontSize: 25),
         ),
         centerTitle: true,
       ),

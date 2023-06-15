@@ -25,6 +25,7 @@ class ComponentButtonForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RoundedLoadingButton(
+      borderRadius: 10,
       controller: controller,
       width: width,
       onPressed: onPressed,
