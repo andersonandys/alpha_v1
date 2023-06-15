@@ -17,6 +17,17 @@ class AppControler extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final Rx<RoundedLoadingButtonController> buttonController =
       RoundedLoadingButtonController().obs;
+  var userlLogin = false.obs;
+  var percentageMusic = 0.obs;
+  var isPlaying = false.obs;
+  checkAuth() {
+    if (_auth.currentUser != null) {
+      userlLogin.value = true;
+    } else {
+      userlLogin.value = false;
+    }
+  }
+
   creatcompte(context) {
     if (nomUser.value.text.isEmpty) {
       messageError("Nous vous prions de saisir votre nom");

@@ -1,4 +1,8 @@
+import 'package:alpha/controllers/app_controler.dart';
+import 'package:alpha/screen/widgets/view_percente.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 class DiffusionScreen extends StatefulWidget {
@@ -9,6 +13,45 @@ class DiffusionScreen extends StatefulWidget {
 }
 
 class _DiffusionScreenState extends State<DiffusionScreen> {
+  AudioPlayer audioPlayer = AudioPlayer();
+  int totalDuration = 0;
+  int currentPosition = 0;
+  final appController = Get.put(AppControler());
+  @override
+  void initState() {
+    super.initState();
+    playMusic();
+  }
+
+  Future<void> playMusic() async {
+    String filePath = 'm1.mp3';
+    audioPlayer.play(AssetSource(filePath));
+    audioPlayer.onDurationChanged.listen((duration) {
+      print(duration.inMilliseconds);
+      setState(() {
+        totalDuration = duration.inMilliseconds;
+      });
+    });
+
+    audioPlayer.onPositionChanged.listen((position) {
+      print(position.inMilliseconds);
+      setState(() {
+        currentPosition = position.inMilliseconds;
+      });
+    });
+
+    audioPlayer.onPlayerComplete.listen((event) {
+      appController.isPlaying.value = false;
+      print("La musique a fini de jouer");
+    });
+  }
+
+  @override
+  void dispose() {
+    audioPlayer.stop();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,39 +89,21 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
                   decoration: BoxDecoration(
                       color: Colors.green,
                       borderRadius: BorderRadius.circular(30)),
-                  child: CircularPercentIndicator(
-                    backgroundWidth: 30,
-                    startAngle: 180,
-                    radius: 100.0,
-                    lineWidth: 16.0,
-                    animation: true,
-                    percent: 0.75,
-                    center: RichText(
-                      text: const TextSpan(
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          color: Colors.black,
-                        ),
-                        children: [
-                          TextSpan(
-                            text: '75 %\n',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 50,
-                                color: Colors.white),
-                          ),
-                          TextSpan(
-                              text: 'En cours...',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                  color: Colors.white)),
-                        ],
-                      ),
-                    ),
-                    circularStrokeCap: CircularStrokeCap.round,
-                    progressColor: Colors.green,
-                    backgroundColor: Colors.white,
+                  child: StreamBuilder<int>(
+                    stream: Stream.periodic(const Duration(milliseconds: 200),
+                        (_) => currentPosition),
+                    builder:
+                        (BuildContext context, AsyncSnapshot<int> snapshot) {
+                      double progress = totalDuration != 0
+                          ? currentPosition.toDouble() /
+                              totalDuration.toDouble()
+                          : 0;
+
+                      appController.percentageMusic.value =
+                          progress.isFinite ? (progress * 100).toInt() : 0;
+                      ;
+                      return ViewPercente();
+                    },
                   ),
                 ),
                 const SizedBox(
