@@ -1,8 +1,25 @@
+import 'package:alpha/controllers/app_controler.dart';
+import 'package:alpha/screen/login_screen.dart';
+import 'package:alpha/screen/onboarding_screen.dart';
 import 'package:alpha/screen/profile_screen.dart';
+import 'package:ficonsax/ficonsax.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-class SettingScreen extends StatelessWidget {
-  const SettingScreen({super.key});
+class SettingScreen extends StatefulWidget {
+  const SettingScreen({Key? key}) : super(key: key);
+
+  @override
+  _SettingScreenState createState() => _SettingScreenState();
+}
+
+class _SettingScreenState extends State<SettingScreen> {
+  final appControler = Get.put(AppControler());
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,16 +55,18 @@ class SettingScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   const Text(
-                    "Daniel Axel",
+                    // "${appControler.userData.value!.name} ",
+                    "Anderson",
                     style: TextStyle(
                       fontSize: 25,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const Text(
-                    "Douala - Cameroun",
-                    style: TextStyle(
+                  Text(
+                    // "${appControler.userData.value!.email} ",
+                    "Anderson@gmail.com",
+                    style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Colors.grey),
@@ -59,7 +78,7 @@ class SettingScreen extends StatelessWidget {
             _buildListTile(
               title: "Mon compte",
               subTitle: "Profil, Telephone, Email",
-              icon: Icons.person_outlined,
+              icon: IconsaxBold.profile_circle,
               onTap: () {
                 Navigator.push(
                   context,
@@ -73,21 +92,21 @@ class SettingScreen extends StatelessWidget {
             _buildListTile(
               title: "Culture",
               subTitle: "Tomate, Salade, Goyave",
-              icon: Icons.person_outlined,
+              icon: IconsaxBold.flash_1,
               onTap: () {},
             ),
             const SizedBox(height: 20),
             _buildListTile(
               title: "Diffusion",
               subTitle: "Afficher l'historique",
-              icon: Icons.person_outlined,
+              icon: Icons.podcasts_rounded,
               onTap: () {},
             ),
             const SizedBox(height: 20),
             _buildListTile(
               title: "Feedback",
               subTitle: "Afficher l'historique",
-              icon: Icons.person_outlined,
+              icon: Icons.feedback_rounded,
               onTap: () {},
             ),
             const Spacer(),
@@ -98,6 +117,23 @@ class SettingScreen extends StatelessWidget {
                 fontSize: 14,
               ),
             ),
+            TextButton(
+                onPressed: () {
+                  FirebaseAuth.instance.signOut();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (BuildContext context) => const LoginScreen(),
+                    ),
+                  );
+                },
+                child: const Text(
+                  "Deconnexion",
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 14,
+                  ),
+                )),
             const SizedBox(height: 10),
             const Text(
               "Supprimer mon compte",

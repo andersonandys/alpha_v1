@@ -34,9 +34,11 @@ class UserController extends ChangeNotifier {
 
   Future<void> initRegisterUserData(User? userData) async {
     if (userData != null) {
-      _userData = UserModel(uid: userData.uid, email: userData.email);
+      // _userData = UserModel(uid: userData.uid, email: userData.email);
 
-      await _db.collection(AppConstants.collectionUsersFS).add(_userData.toJson());
+      await _db
+          .collection(AppConstants.collectionUsersFS)
+          .add(_userData.toJson());
     }
   }
 

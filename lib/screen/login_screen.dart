@@ -157,7 +157,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 30),
                   GestureDetector(
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute<void>(
+                          builder: (BuildContext context) =>
+                              const RegisterScreen(),
+                        ),
+                      );
+                    },
                     child: RichText(
                       text: const TextSpan(
                           text: "Pas de compte ? ",

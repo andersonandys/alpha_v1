@@ -1,11 +1,13 @@
+import 'package:alpha/controllers/app_controler.dart';
 import 'package:alpha/screen/widgets/text_form_field_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class ProfileScreen extends StatelessWidget {
   ProfileScreen({super.key});
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
+  final appControler = Get.put(AppControler());
   @override
   Widget build(BuildContext context) {
     return Scaffold(

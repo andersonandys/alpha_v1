@@ -1,4 +1,6 @@
 import 'package:alpha/constants/app_constants.dart';
+import 'package:alpha/controllers/user_controller.dart';
+import 'package:alpha/models/user_model.dart';
 import 'package:alpha/screen/dashboard_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ficonsax/ficonsax.dart';
@@ -17,9 +19,12 @@ class AppControler extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final Rx<RoundedLoadingButtonController> buttonController =
       RoundedLoadingButtonController().obs;
+  var userid = "".obs;
   var userlLogin = false.obs;
   var percentageMusic = 0.obs;
   var isPlaying = false.obs;
+  Rx<UserModel?> userData = Rx<UserModel?>(null);
+
   checkAuth() {
     if (_auth.currentUser != null) {
       userlLogin.value = true;
@@ -129,6 +134,17 @@ class AppControler extends GetxController {
       } catch (e) {
         print(e);
       }
+    }
+  }
+
+  fetUserData() async {
+    QuerySnapshot q = await _instancefirestore
+        .collection(AppConstants.collectionUsersFS)
+        .get();
+    if (q.docs.isNotEmpty) {
+      final datafs = q.docs.first.data();
+      userData.value = UserModel.fromJson(datafs as Map<String, dynamic>);
+      userid.value = q.docs.first.id;
     }
   }
 
