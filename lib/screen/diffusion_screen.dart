@@ -24,7 +24,7 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
   }
 
   Future<void> playMusic() async {
-    String filePath = 'm1.mp3';
+    String filePath = 'm2.mp3';
     audioPlayer.play(AssetSource(filePath));
     audioPlayer.onDurationChanged.listen((duration) {
       print(duration.inMilliseconds);
@@ -41,7 +41,7 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
     });
 
     audioPlayer.onPlayerComplete.listen((event) {
-      appController.isPlaying.value = false;
+      appController.isPlaying.value = true;
       print("La musique a fini de jouer");
     });
   }

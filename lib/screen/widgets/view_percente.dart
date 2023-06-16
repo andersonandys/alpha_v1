@@ -22,7 +22,7 @@ class _ViewPercenteState extends State<ViewPercente> {
       startAngle: 180,
       radius: 100.0,
       lineWidth: 16.0,
-      animation: true,
+      animation: false,
       percent: appController.percentageMusic.value / 100,
       center: RichText(
         text: TextSpan(
@@ -39,7 +39,9 @@ class _ViewPercenteState extends State<ViewPercente> {
                   color: Colors.white),
             ),
             TextSpan(
-                text: (appController.isPlaying.value) ? 'En cours' : 'Terminée',
+                text: (appController.isPlaying.value == false)
+                    ? 'En cours'
+                    : 'Terminée',
                 style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,

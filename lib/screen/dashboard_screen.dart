@@ -1,4 +1,8 @@
+import 'package:alpha/screen/Actualite_screen.dart';
 import 'package:alpha/screen/diffusion_screen.dart';
+import 'package:alpha/screen/profile_screen.dart';
+import 'package:alpha/screen/setting_screen.dart';
+import 'package:ficonsax/ficonsax.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -26,6 +30,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
             color: Colors.black.withBlue(30),
           ),
         ),
+        actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (BuildContext context) => const Actualite_screen(),
+                  ),
+                );
+              },
+              icon: const Icon(
+                IconsaxOutline.bookmark_2,
+                size: 30,
+                color: Colors.black,
+              )),
+          IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (BuildContext context) => const SettingScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(
+                IconsaxBold.profile_circle,
+                size: 30,
+                color: Colors.black,
+              ))
+        ],
         centerTitle: true,
       ),
       body: Padding(
@@ -196,7 +230,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   const SizedBox(width: 25),
                   const Text(
-                    "Emettre un Feedback",
+                    "Consulter FAQ",
                     style: TextStyle(
                       fontSize: 22,
                       color: Colors.white,
