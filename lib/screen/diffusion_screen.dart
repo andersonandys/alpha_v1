@@ -171,62 +171,50 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
                 const SizedBox(
                   height: 50,
                 ),
-                FirestoreListView<Map<String, dynamic>>(
-                  shrinkWrap: true,
-                  query: appController.datadDifusion.value,
-                  itemBuilder: (context, snapshot) {
-                    Map<String, dynamic> dataDiffusion = snapshot.data();
-                    return Column(
-                      children: <Widget>[
-                        Text(
-                          'Historique du  ${dataDiffusion["datecomplete"]} ',
-                          style: const TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.w500),
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        ListTile(
-                          contentPadding: const EdgeInsets.all(0),
-                          title: const Text(
-                            'Diffusion 1/3',
-                            style:
-                                TextStyle(fontSize: 20, color: Colors.black54),
-                          ),
-                          trailing: Text(
-                            '${dataDiffusion["diffusion1"]}',
-                            style: const TextStyle(
-                                fontSize: 20, color: Colors.black54),
-                          ),
-                        ),
-                        ListTile(
-                          contentPadding: const EdgeInsets.all(0),
-                          title: const Text(
-                            'Diffusion 2/3',
-                            style: TextStyle(fontSize: 20, color: Colors.green),
-                          ),
-                          trailing: Text(
-                            '${dataDiffusion["diffusion1"]}',
-                            style: const TextStyle(
-                                fontSize: 20, color: Colors.green),
-                          ),
-                        ),
-                        ListTile(
-                          contentPadding: const EdgeInsets.all(0),
-                          title: const Text(
-                            'Diffusion 3/3',
-                            style:
-                                TextStyle(fontSize: 20, color: Colors.black54),
-                          ),
-                          trailing: Text(
-                            '${dataDiffusion["diffusion1"]}',
-                            style: const TextStyle(
-                                fontSize: 20, color: Colors.black54),
-                          ),
-                        )
-                      ],
-                    );
-                  },
+                const Column(
+                  children: <Widget>[
+                    Text(
+                      'Historique du  17 Juin 2023 ',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    ListTile(
+                      contentPadding: EdgeInsets.all(0),
+                      title: Text(
+                        'Diffusion 1/3',
+                        style: TextStyle(fontSize: 20, color: Colors.black54),
+                      ),
+                      trailing: Text(
+                        'Succēs',
+                        style: TextStyle(fontSize: 20, color: Colors.black54),
+                      ),
+                    ),
+                    ListTile(
+                      contentPadding: EdgeInsets.all(0),
+                      title: Text(
+                        'Diffusion 2/3',
+                        style: TextStyle(fontSize: 20, color: Colors.green),
+                      ),
+                      trailing: Text(
+                        'En cours',
+                        style: TextStyle(fontSize: 20, color: Colors.green),
+                      ),
+                    ),
+                    ListTile(
+                      contentPadding: EdgeInsets.all(0),
+                      title: Text(
+                        'Diffusion 3/3',
+                        style: TextStyle(fontSize: 20, color: Colors.black54),
+                      ),
+                      trailing: Text(
+                        'Avenir',
+                        style: TextStyle(fontSize: 20, color: Colors.black54),
+                      ),
+                    )
+                  ],
                 ),
               ],
             )),

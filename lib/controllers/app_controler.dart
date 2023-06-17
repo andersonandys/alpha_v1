@@ -1,13 +1,22 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:alpha/constants/app_constants.dart';
 import 'package:alpha/models/user_model.dart';
 import 'package:alpha/screen/dashboard_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ficonsax/ficonsax.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+// import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 import 'package:rounded_loading_button/rounded_loading_button.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AppControler extends GetxController {
   Rx<TextEditingController> nomUser = TextEditingController().obs;
@@ -15,13 +24,25 @@ class AppControler extends GetxController {
   Rx<TextEditingController> password = TextEditingController().obs;
   Rx<TextEditingController> passwordConfitm = TextEditingController().obs;
   final FirebaseFirestore _instancefirestore = FirebaseFirestore.instance;
+
+  //  final FirebaseStorage firebase_storage = FirebaseStorage.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final Rx<RoundedLoadingButtonController> buttonController =
       RoundedLoadingButtonController().obs;
-  var userid = "".obs;
+  var numberDiffusion = TextEditingController().obs;
+  var intervalDiffusion = TextEditingController().obs;
+  var userid = FirebaseAuth.instance.currentUser!.uid.obs;
   var userlLogin = false.obs;
   var percentageMusic = 0.obs;
   var isPlaying = false.obs;
+  Rx<Stream<QuerySnapshot<Map<String, dynamic>>>> DiffusionData =
+      FirebaseFirestore.instance
+          .collection("diffusions")
+          .where("iduser", isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+          .where("date",
+              isEqualTo: "${DateTime.now().day}/${DateTime.now().month}")
+          .snapshots()
+          .obs;
   late Rx<UserModel?> userData = Rx<UserModel?>(null);
   String day = "${DateTime.now().day}";
   String month = "${DateTime.now().month}";
@@ -30,7 +51,8 @@ class AppControler extends GetxController {
       .where("date", isEqualTo: "${DateTime.now().day}/${DateTime.now().month}")
       .where("uid", isEqualTo: FirebaseAuth.instance.currentUser!.uid)
       .obs;
-
+  var urlaudio = "".obs;
+  var upload = false.obs;
   checkAuth() {
     if (_auth.currentUser != null) {
       userlLogin.value = true;
@@ -164,5 +186,109 @@ class AppControler extends GetxController {
           IconsaxBold.check,
           color: Colors.white,
         ));
+  }
+
+  selectaudio() async {
+    ("object");
+    // Action pour le bouton d'inscription
+    FilePickerResult? result =
+        await FilePicker.platform.pickFiles(type: FileType.audio);
+
+    if (result != null) {
+      File file = File(result.files.single.path!);
+      String base64Audio = base64Encode(file.readAsBytesSync());
+      uploadFileToFirebaseStorage(base64Audio);
+    } else {
+      // User canceled the picker
+    }
+  }
+
+  Future<void> uploadFileToFirebaseStorage(String base64Audio) async {
+    upload.value = true;
+    Uint8List audioBytes = base64Decode(base64Audio);
+    firebase_storage.Reference storageRef = firebase_storage
+        .FirebaseStorage.instance
+        .ref()
+        .child('audio_files/${DateTime.now().millisecondsSinceEpoch}');
+
+    firebase_storage.UploadTask uploadTask = storageRef.putData(
+      audioBytes,
+      firebase_storage.SettableMetadata(contentType: 'audio/mp3'),
+    );
+
+    firebase_storage.TaskSnapshot taskSnapshot =
+        await uploadTask.whenComplete(() => null);
+    String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+    urlaudio.value = downloadUrl;
+  }
+
+  Future<void> initializeSharedPreferences() async {}
+
+  addsetting() async {
+    SharedPreferences prefs;
+
+    try {
+      prefs = await SharedPreferences.getInstance();
+    } on PlatformException catch (e) {
+      print(
+          "Erreur lors de l'initialisation de SharedPreferences: ${e.message}");
+      return; // Quitter la fonction en cas d'erreur
+    }
+
+    var intervalSecond = int.parse(intervalDiffusion.value.text) * 60;
+    var setting = {
+      "urlaudio": urlaudio.value,
+      "numberDiffusion": numberDiffusion.value.text,
+      "interval": intervalDiffusion.value.text,
+      "intervalSecondd": intervalSecond,
+      "userid": _auth.currentUser!.uid
+    };
+
+    prefs.setInt("numberDiffusion", int.parse(numberDiffusion.value.text));
+    prefs.setInt("interval", int.parse(intervalDiffusion.value.text));
+    prefs.setInt("urlaudio", int.parse(urlaudio.value));
+    prefs.setInt("intervalSecondd", intervalSecond);
+
+    QuerySnapshot q = await _instancefirestore
+        .collection(AppConstants.collectionDiffusionFS)
+        .where('iduser', isEqualTo: _auth.currentUser!.uid)
+        .get();
+
+    if (q.docs.isEmpty) {
+      _instancefirestore
+          .collection(AppConstants.collectionSettingFS)
+          .add(setting);
+    } else {
+      _instancefirestore
+          .collection(AppConstants.collectionSettingFS)
+          .doc(q.docs.first.id)
+          .update(setting);
+    }
+
+    numberDiffusion.value.clear();
+    intervalDiffusion.value.clear();
+    urlaudio.value = "";
+    upload.value = false;
+  }
+
+  createDiffusion() async {
+    QuerySnapshot q = await _instancefirestore
+        .collection(AppConstants.collectionDiffusionFS)
+        .where('iduser', isEqualTo: _auth.currentUser!.uid)
+        .where("date",
+            isNotEqualTo: "${DateTime.now().day}/${DateTime.now().month}")
+        .get();
+    if (q.docs.length != 1) {
+      var datadif = {
+        "date": "${DateTime.now().day}/${DateTime.now().month}",
+        "dateComplete": DateTime.now(),
+        "iduser": _auth.currentUser!.uid,
+      };
+      _instancefirestore
+          .collection(AppConstants.collectionDiffusionFS)
+          .add(datadif);
+    } else {
+      // redirection dashboard
+    }
   }
 }
