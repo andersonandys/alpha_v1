@@ -1,5 +1,4 @@
 import 'package:alpha/constants/app_constants.dart';
-import 'package:alpha/controllers/user_controller.dart';
 import 'package:alpha/models/user_model.dart';
 import 'package:alpha/screen/dashboard_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -23,7 +22,14 @@ class AppControler extends GetxController {
   var userlLogin = false.obs;
   var percentageMusic = 0.obs;
   var isPlaying = false.obs;
-  Rx<UserModel?> userData = Rx<UserModel?>(null);
+  late Rx<UserModel?> userData = Rx<UserModel?>(null);
+  String day = "${DateTime.now().day}";
+  String month = "${DateTime.now().month}";
+  final datadDifusion = FirebaseFirestore.instance
+      .collection(AppConstants.collectionDiffusionFS)
+      .where("date", isEqualTo: "${DateTime.now().day}/${DateTime.now().month}")
+      .where("uid", isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+      .obs;
 
   checkAuth() {
     if (_auth.currentUser != null) {
@@ -140,6 +146,7 @@ class AppControler extends GetxController {
   fetUserData() async {
     QuerySnapshot q = await _instancefirestore
         .collection(AppConstants.collectionUsersFS)
+        .where("uid", isEqualTo: _auth.currentUser!.uid)
         .get();
     if (q.docs.isNotEmpty) {
       final datafs = q.docs.first.data();

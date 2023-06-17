@@ -24,31 +24,31 @@ class _ViewPercenteState extends State<ViewPercente> {
       lineWidth: 16.0,
       animation: false,
       percent: appController.percentageMusic.value / 100,
-      center: RichText(
-        text: TextSpan(
-          style: const TextStyle(
-            fontSize: 16.0,
-            color: Colors.black,
-          ),
-          children: [
-            TextSpan(
-              text: "${appController.percentageMusic.value} % \n",
+      center: Obx(() => RichText(
+            text: TextSpan(
               style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 50,
-                  color: Colors.white),
+                fontSize: 16.0,
+                color: Colors.black,
+              ),
+              children: [
+                TextSpan(
+                  text: "${appController.percentageMusic.value}%\n",
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 50,
+                      color: Colors.white),
+                ),
+                TextSpan(
+                    text: (appController.isPlaying.value == true)
+                        ? 'En cours'
+                        : 'Terminée',
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: Colors.white)),
+              ],
             ),
-            TextSpan(
-                text: (appController.isPlaying.value == false)
-                    ? 'En cours'
-                    : 'Terminée',
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                    color: Colors.white)),
-          ],
-        ),
-      ),
+          )),
       circularStrokeCap: CircularStrokeCap.round,
       progressColor: Colors.green,
       backgroundColor: Colors.white,

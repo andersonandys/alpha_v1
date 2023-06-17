@@ -2,6 +2,7 @@ import 'package:alpha/controllers/app_controler.dart';
 import 'package:alpha/screen/login_screen.dart';
 import 'package:alpha/screen/onboarding_screen.dart';
 import 'package:alpha/screen/profile_screen.dart';
+import 'package:alpha/screen/settingDiffusion_screen.dart';
 import 'package:ficonsax/ficonsax.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ class _SettingScreenState extends State<SettingScreen> {
   final appControler = Get.put(AppControler());
   @override
   void initState() {
+    appControler.fetUserData();
     super.initState();
   }
 
@@ -54,10 +56,10 @@ class _SettingScreenState extends State<SettingScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const Text(
+                  Text(
                     // "${appControler.userData.value!.name} ",
-                    "Anderson",
-                    style: TextStyle(
+                    "",
+                    style: const TextStyle(
                       fontSize: 25,
                       fontWeight: FontWeight.bold,
                     ),
@@ -65,7 +67,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   const SizedBox(height: 20),
                   Text(
                     // "${appControler.userData.value!.email} ",
-                    "Anderson@gmail.com",
+                    "",
                     style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -100,7 +102,14 @@ class _SettingScreenState extends State<SettingScreen> {
               title: "Diffusion",
               subTitle: "Afficher l'historique",
               icon: Icons.podcasts_rounded,
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SettingDiffusionScreen(),
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 20),
             _buildListTile(

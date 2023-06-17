@@ -1,9 +1,11 @@
+import 'dart:async';
+
 import 'package:alpha/controllers/app_controler.dart';
 import 'package:alpha/screen/widgets/view_percente.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
 
 class DiffusionScreen extends StatefulWidget {
   const DiffusionScreen({Key? key}) : super(key: key);
@@ -17,37 +19,90 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
   int totalDuration = 0;
   int currentPosition = 0;
   final appController = Get.put(AppControler());
+  int currentMusicIndex = 0;
+  late DateTime startTime;
+  Duration duration = const Duration(hours: 5);
+  late Timer _timer;
+  int _countdown = 120; // 15 minutes en secondes
   @override
   void initState() {
     super.initState();
+    startTime = DateTime.now();
     playMusic();
   }
 
+  void startTimer() {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        if (_countdown > 0) {
+          _countdown--;
+        } else {
+          // Minuterie expirée, exécuter la fonction souhaitée ici
+          onTimerExpired();
+          _timer.cancel();
+        }
+      });
+    });
+  }
+
+  void onTimerExpired() {
+    // Fonction à exécuter après l'expiration de la minuterie
+    print("Minuterie expirée, exécution de la fonction...");
+    // Relancez ici la fonction que vous souhaitez exécuter après l'expiration de la minuterie
+  }
+
+  String formatTime(int seconds) {
+    int minutes = seconds ~/ 60;
+    int remainingSeconds = seconds % 60;
+    return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
+  }
+
   Future<void> playMusic() async {
+    if (appController.isPlaying.isTrue) return;
     String filePath = 'm2.mp3';
+    appController.isPlaying.value = true;
     audioPlayer.play(AssetSource(filePath));
     audioPlayer.onDurationChanged.listen((duration) {
-      print(duration.inMilliseconds);
       setState(() {
         totalDuration = duration.inMilliseconds;
       });
     });
 
     audioPlayer.onPositionChanged.listen((position) {
-      print(position.inMilliseconds);
       setState(() {
         currentPosition = position.inMilliseconds;
       });
     });
 
     audioPlayer.onPlayerComplete.listen((event) {
-      appController.isPlaying.value = true;
       print("La musique a fini de jouer");
+      continu();
+    });
+  }
+
+  continu() async {
+    print(currentMusicIndex);
+    appController.percentageMusic.value = 0;
+    appController.isPlaying.value = false;
+    setState(() {
+      currentMusicIndex++;
+      currentPosition = 0;
+      totalDuration = 0;
+    });
+    startTimer();
+    Future.delayed(const Duration(minutes: 2), () {
+      currentMusicIndex++; // Passer à la musique suivante
+
+      if (DateTime.now().difference(startTime) < duration) {
+        // Appeler playMusic() pour lancer la musique suivante
+        playMusic();
+      }
     });
   }
 
   @override
   void dispose() {
+    _timer.cancel();
     audioPlayer.stop();
     super.dispose();
   }
@@ -76,10 +131,17 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
                 const SizedBox(
                   height: 20,
                 ),
-                const Text(
-                  "Veuillez patienter Lorem Ipsum is simply dummy typesetting industry",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                ),
+                (appController.isPlaying.isTrue)
+                    ? const Text(
+                        "Votre diffusion est en cours",
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.w600),
+                      )
+                    : Text(
+                        'Votre prochaine diffusion reprend dans ${formatTime(_countdown)}',
+                        style: const TextStyle(fontSize: 20),
+                        textAlign: TextAlign.center,
+                      ),
                 const SizedBox(
                   height: 50,
                 ),
@@ -109,46 +171,63 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
                 const SizedBox(
                   height: 50,
                 ),
-                const Text(
-                  'Historique du Mercredi 14 juin 2023',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                FirestoreListView<Map<String, dynamic>>(
+                  shrinkWrap: true,
+                  query: appController.datadDifusion.value,
+                  itemBuilder: (context, snapshot) {
+                    Map<String, dynamic> dataDiffusion = snapshot.data();
+                    return Column(
+                      children: <Widget>[
+                        Text(
+                          'Historique du  ${dataDiffusion["datecomplete"]} ',
+                          style: const TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.w500),
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        ListTile(
+                          contentPadding: const EdgeInsets.all(0),
+                          title: const Text(
+                            'Diffusion 1/3',
+                            style:
+                                TextStyle(fontSize: 20, color: Colors.black54),
+                          ),
+                          trailing: Text(
+                            '${dataDiffusion["diffusion1"]}',
+                            style: const TextStyle(
+                                fontSize: 20, color: Colors.black54),
+                          ),
+                        ),
+                        ListTile(
+                          contentPadding: const EdgeInsets.all(0),
+                          title: const Text(
+                            'Diffusion 2/3',
+                            style: TextStyle(fontSize: 20, color: Colors.green),
+                          ),
+                          trailing: Text(
+                            '${dataDiffusion["diffusion1"]}',
+                            style: const TextStyle(
+                                fontSize: 20, color: Colors.green),
+                          ),
+                        ),
+                        ListTile(
+                          contentPadding: const EdgeInsets.all(0),
+                          title: const Text(
+                            'Diffusion 3/3',
+                            style:
+                                TextStyle(fontSize: 20, color: Colors.black54),
+                          ),
+                          trailing: Text(
+                            '${dataDiffusion["diffusion1"]}',
+                            style: const TextStyle(
+                                fontSize: 20, color: Colors.black54),
+                          ),
+                        )
+                      ],
+                    );
+                  },
                 ),
-                const SizedBox(
-                  height: 20,
-                ),
-                const ListTile(
-                  contentPadding: EdgeInsets.all(0),
-                  title: Text(
-                    'Diffusion 1/3',
-                    style: TextStyle(fontSize: 20, color: Colors.black54),
-                  ),
-                  trailing: Text(
-                    'Succès',
-                    style: TextStyle(fontSize: 20, color: Colors.black54),
-                  ),
-                ),
-                const ListTile(
-                  contentPadding: EdgeInsets.all(0),
-                  title: Text(
-                    'Diffusion 2/3',
-                    style: TextStyle(fontSize: 20, color: Colors.green),
-                  ),
-                  trailing: Text(
-                    'En cours',
-                    style: TextStyle(fontSize: 20, color: Colors.green),
-                  ),
-                ),
-                const ListTile(
-                  contentPadding: EdgeInsets.all(0),
-                  title: Text(
-                    'Diffusion 3/3',
-                    style: TextStyle(fontSize: 20, color: Colors.black54),
-                  ),
-                  trailing: Text(
-                    "A venir",
-                    style: TextStyle(fontSize: 20, color: Colors.black54),
-                  ),
-                )
               ],
             )),
             ElevatedButton(
