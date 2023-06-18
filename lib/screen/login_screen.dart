@@ -192,27 +192,32 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(
                     height: 50,
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      GestureDetector(
-                        onTap: () {},
-                        child: const CircleAvatar(
-                          backgroundColor: Colors.transparent,
-                          radius: 25,
-                          backgroundImage: AssetImage("assets/goo.png"),
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-                      GestureDetector(
-                        onTap: () {},
-                        child: const CircleAvatar(
-                          radius: 25,
-                          backgroundImage: AssetImage("assets/facebook.png"),
-                        ),
-                      ),
-                    ],
-                  )
+                  GestureDetector(
+                      onTap: () {
+                        appControler.signInWithGoogle();
+                      },
+                      child: Column(
+                        children: <Widget>[
+                          const CircleAvatar(
+                            backgroundColor: Color.fromARGB(0, 40, 22, 22),
+                            radius: 25,
+                            backgroundImage: AssetImage("assets/goo.png"),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              // Action à effectuer lors du clic sur le bouton
+                            },
+                            child: const Text(
+                              'Google Mail',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                          )
+                        ],
+                      )),
                 ],
               ),
             ),

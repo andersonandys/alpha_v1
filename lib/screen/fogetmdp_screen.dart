@@ -1,4 +1,6 @@
+import 'package:alpha/controllers/app_controler.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class ForgetPasswordScreen extends StatefulWidget {
   const ForgetPasswordScreen({Key? key}) : super(key: key);
@@ -8,6 +10,7 @@ class ForgetPasswordScreen extends StatefulWidget {
 }
 
 class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
+  final appControler = Get.put(AppControler());
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -43,6 +46,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
               height: 40,
             ),
             TextFormField(
+              controller: appControler.resetPasswords.value,
               decoration: const InputDecoration(
                   suffixIcon: Icon(
                     Icons.mail_lock,
@@ -70,7 +74,9 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                     backgroundColor: Colors.green,
                     elevation: 0,
                     fixedSize: Size(MediaQuery.of(context).size.width, 60)),
-                onPressed: () {},
+                onPressed: () {
+                  appControler.resetPassword();
+                },
                 child: const Text(
                   'Envoyer',
                   style: TextStyle(fontSize: 20, color: Colors.white),

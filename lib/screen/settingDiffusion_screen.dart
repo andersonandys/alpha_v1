@@ -98,7 +98,7 @@ class _SettingDiffusionScreenState extends State<SettingDiffusionScreen> {
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () async {
-                    appController.selectaudio();
+                    appController.selectifile("audio");
                   },
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,
@@ -121,7 +121,7 @@ class _SettingDiffusionScreenState extends State<SettingDiffusionScreen> {
                     style: TextStyle(fontSize: 18),
                     textAlign: TextAlign.center,
                   ),
-                if (appController.urlaudio.isNotEmpty)
+                if (appController.urlfile.isNotEmpty)
                   const Text(
                     'Audio importe avec succes',
                     style: TextStyle(fontSize: 18),

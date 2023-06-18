@@ -1,5 +1,6 @@
 import 'package:alpha/firebase_options.dart';
 import 'package:alpha/screen/dashboard_screen.dart';
+import 'package:alpha/screen/home_noconnect_screen.dart';
 import 'package:alpha/screen/onboarding_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -31,7 +32,7 @@ class MyApp extends StatelessWidget {
       ),
       home: (FirebaseAuth.instance.currentUser != null)
           ? const DashboardScreen()
-          : const Onboarding(),
+          : const HomeNoconnectScreen(),
     );
   }
 }

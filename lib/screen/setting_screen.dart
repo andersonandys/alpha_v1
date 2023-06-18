@@ -3,6 +3,7 @@ import 'package:alpha/screen/login_screen.dart';
 import 'package:alpha/screen/onboarding_screen.dart';
 import 'package:alpha/screen/profile_screen.dart';
 import 'package:alpha/screen/settingDiffusion_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ficonsax/ficonsax.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,10 @@ class SettingScreen extends StatefulWidget {
 
 class _SettingScreenState extends State<SettingScreen> {
   final appControler = Get.put(AppControler());
+  final Stream<QuerySnapshot> streamUserProfil = FirebaseFirestore.instance
+      .collection("users")
+      .where("userid", isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+      .snapshots();
   @override
   void initState() {
     appControler.fetUserData();
@@ -36,124 +41,24 @@ class _SettingScreenState extends State<SettingScreen> {
         ),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            Center(
-              child: Column(
-                children: [
-                  Container(
-                    height: 150,
-                    width: 150,
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(15),
-                      image: const DecorationImage(
-                        image: AssetImage("assets/profil.jpeg"),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    // "${appControler.userData.value!.name} ",
-                    "",
-                    style: const TextStyle(
-                      fontSize: 25,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    // "${appControler.userData.value!.email} ",
-                    "",
-                    style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 40),
-            _buildListTile(
-              title: "Mon compte",
-              subTitle: "Profil, Telephone, Email",
-              icon: IconsaxBold.profile_circle,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ProfileScreen(),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 20),
-            _buildListTile(
-              title: "Culture",
-              subTitle: "Tomate, Salade, Goyave",
-              icon: IconsaxBold.flash_1,
-              onTap: () {},
-            ),
-            const SizedBox(height: 20),
-            _buildListTile(
-              title: "Diffusion",
-              subTitle: "Afficher l'historique",
-              icon: Icons.podcasts_rounded,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SettingDiffusionScreen(),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 20),
-            _buildListTile(
-              title: "Feedback",
-              subTitle: "Afficher l'historique",
-              icon: Icons.feedback_rounded,
-              onTap: () {},
-            ),
-            const Spacer(),
-            const Text(
-              "Paramètres de données",
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 14,
-              ),
-            ),
-            TextButton(
-                onPressed: () {
-                  FirebaseAuth.instance.signOut();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute<void>(
-                      builder: (BuildContext context) => const LoginScreen(),
-                    ),
-                  );
-                },
-                child: const Text(
-                  "Deconnexion",
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
-                  ),
-                )),
-            const SizedBox(height: 10),
-            const Text(
-              "Supprimer mon compte",
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 15),
-          ],
-        ),
+      body: StreamBuilder(
+        stream: streamUserProfil,
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          } else if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          return ListView.builder(itemBuilder: ((context, index) {
+            return Column(
+              children: <Widget>[],
+            );
+          }));
+        },
       ),
     );
   }
