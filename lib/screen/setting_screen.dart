@@ -23,6 +23,8 @@ class _SettingScreenState extends State<SettingScreen> {
       .collection("users")
       .where("userid", isEqualTo: FirebaseAuth.instance.currentUser!.uid)
       .snapshots();
+  String noavatar =
+      "https://firebasestorage.googleapis.com/v0/b/alpha-project-ce3c9.appspot.com/o/default.jpeg?alt=media&token=de6a613f-eaac-4586-8dcb-e1fc252b12ad";
   @override
   void initState() {
     appControler.fetUserData();
@@ -76,8 +78,11 @@ class _SettingScreenState extends State<SettingScreen> {
                                 color: Colors.grey.shade200,
                                 borderRadius: BorderRadius.circular(15),
                                 image: DecorationImage(
-                                  image:
-                                      NetworkImage(userinfo[index]["avatar"]),
+                                  image: (userinfo[index]["avatar"]
+                                          .toString()
+                                          .isEmpty)
+                                      ? NetworkImage(noavatar)
+                                      : NetworkImage(userinfo[index]["avatar"]),
                                   fit: BoxFit.cover,
                                 ),
                               ),
@@ -113,7 +118,15 @@ class _SettingScreenState extends State<SettingScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => ProfileScreen(),
+                              builder: (context) => ProfileScreen(
+                                email: userinfo[index]["mailuser"],
+                                nom: userinfo[index]["nomuser"],
+                                number: (userinfo[index]["numero"]
+                                        .toString()
+                                        .isEmpty)
+                                    ? "+1 1234 567 890"
+                                    : userinfo[index]["numero"],
+                              ),
                             ),
                           );
                         },
@@ -130,7 +143,9 @@ class _SettingScreenState extends State<SettingScreen> {
                         title: "Diffusion",
                         subTitle: "Afficher l'historique",
                         icon: Icons.person_outlined,
-                        onTap: () {},
+                        onTap: () {
+                          Get.to(() => const SettingDiffusionScreen());
+                        },
                       ),
                       const SizedBox(height: 20),
                       _buildListTile(
@@ -138,7 +153,7 @@ class _SettingScreenState extends State<SettingScreen> {
                         subTitle: "Afficher l'historique",
                         icon: Icons.person_outlined,
                         onTap: () {
-                          Get.offAll(() => FeedbackScreen());
+                          Get.to(() => FeedbackScreen());
                         },
                       ),
                       const SizedBox(height: 20),

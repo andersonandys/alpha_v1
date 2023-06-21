@@ -10,23 +10,26 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DiffusionScreen extends StatefulWidget {
-  DiffusionScreen({Key? key, required this.idDiffusion}) : super(key: key);
+  DiffusionScreen({Key? key, required this.idDiffusion, required this.finish})
+      : super(key: key);
   String idDiffusion;
+  bool finish;
   @override
   _DiffusionScreenState createState() => _DiffusionScreenState();
 }
 
 class _DiffusionScreenState extends State<DiffusionScreen> {
-  AudioPlayer audioPlayer = AudioPlayer();
+  // AudioPlayer audioPlayer = AudioPlayer();
   int totalDuration = 0;
   int currentPosition = 0;
   final appController = Get.put(AppControler());
-  int currentMusicIndex = 1;
+  // int currentMusicIndex = 1;
   late DateTime startTime;
   Duration duration = const Duration(hours: 5);
   late Timer _timer;
 
-  int _countdown = 120; // 15 minutes en secondes
+  String datenow = " ${DateTime.now().day}/${DateTime.now().month}";
+  int _countdown = 900; // 15 minutes en secondes
   late final Stream<QuerySnapshot> streamDiffusion = FirebaseFirestore.instance
       .collection("diffusion")
       .doc(widget.idDiffusion)
@@ -37,6 +40,7 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
   @override
   void initState() {
     super.initState();
+    appController.getuserData();
     // print(currentMusicIndex);
     // print("la valeur initiale");
     // if (prefs.getInt("numberDiffus") == 0) {
@@ -49,7 +53,9 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
     // }
     startTime = DateTime.now();
     initializeSharedPreferences();
-    playMusic();
+    if (!widget.finish) {
+      playMusic();
+    }
   }
 
   Future<void> initializeSharedPreferences() async {
@@ -86,29 +92,24 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
     if (appController.isPlaying.isTrue) return;
     String filePath = "test-bach-wtk-1.wav";
     appController.isPlaying.value = true;
-    audioPlayer.play(AssetSource(filePath));
-    audioPlayer.onDurationChanged.listen((duration) {
+    appController.audioPlayer.value.play(AssetSource(filePath));
+    appController.audioPlayer.value.onDurationChanged.listen((duration) {
       prefs.setInt("numberDiffus", 0);
       setState(() {
         totalDuration = duration.inMilliseconds;
       });
     });
 
-    audioPlayer.onPositionChanged.listen((position) {
+    appController.audioPlayer.value.onPositionChanged.listen((position) {
       setState(() {
         currentPosition = position.inMilliseconds;
       });
     });
 
-    audioPlayer.onPlayerComplete.listen((event) {
-      print(currentMusicIndex);
+    appController.audioPlayer.value.onPlayerComplete.listen((event) {
+      // prefs.setInt("numberDiffus", currentMusicIndex);
 
-      setState(() {
-        currentMusicIndex++;
-      });
-      prefs.setInt("numberDiffus", currentMusicIndex);
-      prefs.reload();
-      appController.updateDiffusion(currentMusicIndex);
+      appController.updateDiffusion();
       nextMusic();
     });
   }
@@ -122,7 +123,7 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
     });
     startTimer();
 
-    Future.delayed(const Duration(minutes: 2), () {
+    Future.delayed(const Duration(minutes: 15), () {
       if (DateTime.now().difference(startTime) < duration) {
         // Appeler playMusic() pour lancer la musique suivante
         final int? counter = prefs.getInt('numberDiffus');
@@ -135,7 +136,7 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
   @override
   void dispose() {
     _cancelTimer();
-    audioPlayer.stop();
+    appController.audioPlayer.value.stop();
     super.dispose();
   }
 
@@ -150,7 +151,7 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
       appBar: AppBar(
         leading: IconButton(
             onPressed: () {
-              audioPlayer.stop();
+              appController.audioPlayer.value.stop();
               _cancelTimer();
               Navigator.of(context).pop();
             },
@@ -174,7 +175,7 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   const SizedBox(
-                    height: 20,
+                    height: 10,
                   ),
                   (appController.isPlaying.isTrue)
                       ? const Text(
@@ -189,7 +190,7 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
                           textAlign: TextAlign.center,
                         ),
                   const SizedBox(
-                    height: 50,
+                    height: 30,
                   ),
                   Container(
                     height: 250,
@@ -215,7 +216,7 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
                     ),
                   ),
                   const SizedBox(
-                    height: 50,
+                    height: 30,
                   ),
                   StreamBuilder(
                     stream: streamDiffusion,
@@ -234,7 +235,6 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
                       var dataDif = snapshot.data!.docs;
                       var length = snapshot.data!.docs.length;
                       for (var element in dataDif) {
-                        element["niveau"];
                         if (element["statut"] == "A venir") {
                           if (appController.idChild.contains(element.id)) {
                           } else {
@@ -244,9 +244,9 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
                       }
                       return Column(
                         children: <Widget>[
-                          const Text(
-                            'Historique du  17 Juin 2023 ',
-                            style: TextStyle(
+                          Text(
+                            'Historique du $datenow/ 2023',
+                            style: const TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.w500),
                           ),
                           ListView.builder(
@@ -267,14 +267,22 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
                                             fontSize: 20,
                                             color: Colors.black54),
                                       ),
-                                      trailing: (currentMusicIndex ==
+                                      trailing: (appController
+                                                  .currentMusicIndex.value ==
                                               dataDif[index]["niveau"])
-                                          ? const Text(
-                                              'En diffusion',
-                                              style: TextStyle(
-                                                  fontSize: 20,
-                                                  color: Colors.orange),
-                                            )
+                                          ? (appController.isPlaying.isTrue)
+                                              ? const Text(
+                                                  'En diffusion',
+                                                  style: TextStyle(
+                                                      fontSize: 20,
+                                                      color: Colors.orange),
+                                                )
+                                              : const Text(
+                                                  'En attente',
+                                                  style: TextStyle(
+                                                      fontSize: 20,
+                                                      color: Colors.orange),
+                                                )
                                           : Text(
                                               "${dataDif[index]["statut"]}",
                                               style: TextStyle(
@@ -300,36 +308,38 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
                   ElevatedButton(
                     onPressed: () {
                       print(prefs.getInt("numberDiffus"));
-                      // if (appController.isPlaying.isTrue) {
-                      //   // avertissement
-                      // } else {
-                      //   if (currentMusicIndex < 4) {
-                      //     appController.messageSucces(
-                      //         "Vous ne pouvez pas quitter la diffusion");
-                      //   } else {
-                      //     Navigator.push(
-                      //       context,
-                      //       MaterialPageRoute<void>(
-                      //         builder: (BuildContext context) =>
-                      //             const DashboardScreen(),
-                      //       ),
-                      //     );
-                      //   }
-                      // }
+                      if (appController.isPlaying.isTrue) {
+                        appController.messageError(
+                            "Vous ne pouvez pas quitter la diffusion");
+                      } else {
+                        if (appController.currentMusicIndex.value < 4) {
+                          appController.messageSucces(
+                              "Vous ne pouvez pas quitter la diffusion");
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute<void>(
+                              builder: (BuildContext context) =>
+                                  const DashboardScreen(),
+                            ),
+                          );
+                        }
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Colors.white,
-                      backgroundColor: (currentMusicIndex < 4)
-                          ? Colors.grey
-                          : Colors.green, // Texte en blanc
+                      backgroundColor:
+                          (appController.currentMusicIndex.value < 4)
+                              ? Colors.grey
+                              : Colors.green, // Texte en blanc
                       minimumSize:
                           const Size(double.infinity, 60), // Hauteur du bouton
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10), // Rayon de 10
                       ),
                     ),
-                    child: const Text(
-                      "Terminer",
+                    child: Text(
+                      (!widget.finish) ? "Terminer" : "Diffusion terminée",
                       style: TextStyle(fontSize: 20),
                     ),
                   ),

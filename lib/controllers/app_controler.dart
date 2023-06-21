@@ -6,6 +6,8 @@ import 'package:alpha/models/user_model.dart';
 import 'package:alpha/screen/dashboard_screen.dart';
 import 'package:alpha/screen/diffusion_screen.dart';
 import 'package:alpha/screen/onboarding_screen.dart';
+import 'package:alpha/screen/succesdiffusion_screen.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ficonsax/ficonsax.dart';
 import 'package:file_picker/file_picker.dart';
@@ -33,7 +35,9 @@ class AppControler extends GetxController {
   Rx<TextEditingController> mailfeed = TextEditingController().obs;
   Rx<TextEditingController> messagefeed = TextEditingController().obs;
   final FirebaseFirestore _instancefirestore = FirebaseFirestore.instance;
-
+  var namuserInfo = "".obs;
+  var mailuserInfo = "".obs;
+  var audioPlayer = AudioPlayer().obs;
   //  final FirebaseStorage firebase_storage = FirebaseStorage.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final Rx<RoundedLoadingButtonController> buttonController =
@@ -50,17 +54,32 @@ class AppControler extends GetxController {
   String month = "${DateTime.now().month}";
   var base64File = "".obs;
   var urlfile = "".obs;
+  var loaded = false.obs;
   var upload = false.obs;
   var typefile = "".obs;
   var isload = false.obs;
   var idDiffusion = "".obs;
   var idChild = [].obs;
+  var currentMusicIndex = 1.obs;
   checkAuth() {
     if (_auth.currentUser != null) {
       userlLogin.value = true;
     } else {
       userlLogin.value = false;
     }
+  }
+
+  getuserData() {
+    _instancefirestore
+        .collection(AppConstants.collectionUsersFS)
+        .where("userid", isEqualTo: _auth.currentUser!.uid)
+        .get()
+        .then((value) {
+      for (var element in value.docs) {
+        namuserInfo.value = element["nomuser"];
+        mailuserInfo.value = element["mailuser"];
+      }
+    });
   }
 
   creatcompte(context) {
@@ -80,10 +99,11 @@ class AppControler extends GetxController {
       messageError("Vos mots de passent ne correspodent pas");
       buttonController.value.reset();
     } else {
-      uploadFileToFirebaseStorage(typefile.value).then((value) {
-        print("envoye");
+      if (typefile.isNotEmpty) {
+        uploadFileToFirebaseStorage(typefile.value).then((value) {});
+      } else {
         saveuser(context);
-      });
+      }
     }
   }
 
@@ -110,7 +130,7 @@ class AppControler extends GetxController {
       nomUser.value.clear();
       password.value.clear();
       passwordConfitm.value.clear();
-      Get.offAll(() => const DashboardScreen());
+      Get.offAll(() => const Onboarding());
     } on FirebaseAuthException catch (e) {
       if (e.code == 'invalid-email') {
         messageError("Adresse e-mail invalide");
@@ -398,18 +418,33 @@ class AppControler extends GetxController {
     }
   }
 
-  updateDiffusion(int numberDiffusion) async {
-    print('ajoute a la bdd');
-
-    print(numberDiffusion);
-    print("la valeu");
-    _instancefirestore
-        .collection(AppConstants.collectionDiffusionFS)
-        .doc(idDiffusion.value)
-        .collection("child")
-        .doc(idChild[numberDiffusion])
-        .update({"statut": "Succēs"}).then(
-            (value) => idChild.remove(idChild[numberDiffusion]));
+  updateDiffusion() async {
+    print(currentMusicIndex.value);
+    print(idDiffusion.value);
+    if (idDiffusion.isNotEmpty) {
+      if (idChild.length < currentMusicIndex.value) {
+        _instancefirestore
+            .collection(AppConstants.collectionDiffusionFS)
+            .doc(idDiffusion.value)
+            .update({"finish": true});
+        audioPlayer.value.stop();
+        Get.offAll(() => const SuccesdiffusionScreen());
+      } else {
+        int indexToUpdate =
+            currentMusicIndex.value - 1; // Ajustement de l'indice
+        _instancefirestore
+            .collection(AppConstants.collectionDiffusionFS)
+            .doc(idDiffusion.value)
+            .collection("child")
+            .doc(idChild[indexToUpdate])
+            .update({"statut": "Succēs"}).then((value) {
+          print("modifier avec success");
+        });
+        currentMusicIndex.value++;
+      }
+    } else {
+      print("plus de diffudion");
+    }
   }
 
   updateUser() async {
@@ -457,28 +492,35 @@ class AppControler extends GetxController {
   }
 
   diffusionverif(context) async {
+    loaded.value = true;
     QuerySnapshot q = await _instancefirestore
         .collection(AppConstants.collectionDiffusionFS)
         .where('iduser', isEqualTo: _auth.currentUser!.uid)
         .where("date",
             isEqualTo: "${DateTime.now().day}/${DateTime.now().month}")
         .get();
-
     if (q.docs.length == 1) {
-      print("existe");
-    } else {
-      print("existe pas");
-    }
-    if (q.docs.length == 1) {
-      // redirection vers le dashboard
-      idDiffusion.value = q.docs.first.id;
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (BuildContext context) => DiffusionScreen(
-              idDiffusion: q.docs.first.id,
-            ),
-          ));
+      print(q.docs.first.id);
+      if (q.docs.first["finish"] == true) {
+        loaded.value = false;
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (BuildContext context) => SuccesdiffusionScreen(),
+            ));
+      } else {
+        // redirection vers le dashboard
+        idDiffusion.value = q.docs.first.id;
+        loaded.value = false;
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (BuildContext context) => DiffusionScreen(
+                idDiffusion: q.docs.first.id,
+                finish: q.docs.first["finish"],
+              ),
+            ));
+      }
     } else {
       //  creation des differents diffusions
       var dataDiffusion = {
@@ -487,7 +529,8 @@ class AppControler extends GetxController {
         "date": "${DateTime.now().day}/${DateTime.now().month}",
         "dateComplet":
             "${DateTime.now().day} ${DateTime.now().month} ${DateTime.now().year}",
-        "range": DateTime.now().millisecondsSinceEpoch
+        "range": DateTime.now().millisecondsSinceEpoch,
+        "finish": false
       };
       _instancefirestore
           .collection(AppConstants.collectionDiffusionFS)
@@ -508,12 +551,12 @@ class AppControler extends GetxController {
               .collection("child")
               .add(dataChildDiffusion);
           if (i == 4) {
+            loaded.value = false;
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (BuildContext context) => DiffusionScreen(
-                    idDiffusion: value.id,
-                  ),
+                  builder: (BuildContext context) =>
+                      DiffusionScreen(idDiffusion: value.id, finish: false),
                 ));
           }
         }

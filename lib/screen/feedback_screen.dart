@@ -16,6 +16,13 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
   bool seePassword = false;
   final appControler = Get.put(AppControler());
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    appControler.getuserData();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -43,23 +50,23 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                   const SizedBox(height: 20),
                   TextFormFieldwidget(
                     controller: appControler.nomfeed.value,
-                    hintText: "David Axel",
+                    hintText: appControler.namuserInfo.value,
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 20),
                   _titltText("Adress e-mail"),
                   const SizedBox(height: 10),
                   TextFormFieldwidget(
                     controller: appControler.mailfeed.value,
-                    hintText: "daniel@kameni.me",
+                    hintText: appControler.mailuserInfo.value,
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 20),
                   _titltText("Message"),
                   const SizedBox(height: 10),
                   TextFormFieldwidget(
                     controller: appControler.messagefeed.value,
                     hintText: "",
-                    maxLines: 8,
-                    minLines: 8,
+                    maxLines: 5,
+                    minLines: 5,
                   ),
                   const SizedBox(height: 40),
                   ComponentButtonForm(

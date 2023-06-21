@@ -3,11 +3,25 @@ import 'package:alpha/screen/widgets/text_form_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class ProfileScreen extends StatelessWidget {
-  ProfileScreen({super.key});
+class ProfileScreen extends StatefulWidget {
+  ProfileScreen({
+    Key? key,
+    required this.nom,
+    required this.email,
+    required this.number,
+  }) : super(key: key);
 
+  String nom;
+  String email;
+  String number;
+  @override
+  _ProfileScreenState createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final appControler = Get.put(AppControler());
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,20 +55,20 @@ class ProfileScreen extends StatelessWidget {
               const SizedBox(height: 10),
               TextFormFieldwidget(
                 controller: appControler.nomUser.value,
-                hintText: "David Axel",
+                hintText: widget.nom,
               ),
               const SizedBox(height: 20),
               _titltText("Adresse e-mail"),
               const SizedBox(height: 10),
               TextFormFieldwidget(
-                hintText: "daniel@kameni.me",
+                hintText: widget.email,
                 controller: appControler.mailUser.value,
               ),
               const SizedBox(height: 20),
               _titltText("Numero de telephone"),
               const SizedBox(height: 10),
               TextFormFieldwidget(
-                hintText: "+1 234 567 890",
+                hintText: widget.number,
                 controller: appControler.numberuser.value,
               ),
               const SizedBox(height: 20),

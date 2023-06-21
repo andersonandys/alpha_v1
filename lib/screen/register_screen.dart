@@ -43,10 +43,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               appControler.selectifile("image");
                             },
                             child: (appControler.localPath.value.isEmpty)
-                                ? const CircleAvatar(
-                                    radius: 40,
-                                    backgroundImage:
-                                        AssetImage("assets/default.jpeg"),
+                                ? const Stack(
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 40,
+                                        backgroundImage:
+                                            AssetImage("assets/default.jpeg"),
+                                      ),
+                                      // Positioned(
+                                      //     top: 30,
+                                      //     left: 30,
+                                      //     child: Icon(
+                                      //       Icons.camera_alt_rounded,
+                                      //       color: Colors.white,
+                                      //     ))
+                                    ],
                                   )
                                 : CircleAvatar(
                                     radius: 40,

@@ -1,6 +1,7 @@
 import 'package:alpha/controllers/app_controler.dart';
 import 'package:alpha/screen/Actualite_screen.dart';
 import 'package:alpha/screen/diffusion_screen.dart';
+import 'package:alpha/screen/faq_screen.dart';
 import 'package:alpha/screen/feedback_screen.dart';
 import 'package:alpha/screen/profile_screen.dart';
 import 'package:alpha/screen/setting_screen.dart';
@@ -143,7 +144,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     children: [
                       const Flexible(
                         child: Text(
-                          "Débuter la diffision",
+                          "Débuter la diffusion",
                           style: TextStyle(
                             fontSize: 30,
                             color: Colors.white,
@@ -152,18 +153,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                       ),
                       const SizedBox(width: 10),
-                      Container(
-                        padding: const EdgeInsets.all(25),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Icon(
-                          Icons.podcasts,
-                          color: Colors.green,
-                          size: 70,
-                        ),
-                      ),
+                      Obx(() => Container(
+                            padding: const EdgeInsets.all(25),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: (appcontroler.loaded.isTrue)
+                                ? const CircularProgressIndicator()
+                                : const Icon(
+                                    Icons.podcasts,
+                                    color: Colors.green,
+                                    size: 70,
+                                  ),
+                          )),
                     ],
                   ),
                 ),
@@ -256,7 +259,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute<void>(
-                      builder: (BuildContext context) => const FeedbackScreen(),
+                      builder: (BuildContext context) => Faq_screen(),
                     ),
                   );
                 },

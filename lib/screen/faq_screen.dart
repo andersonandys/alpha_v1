@@ -85,7 +85,22 @@ class _Faq_screenState extends State<Faq_screen> {
       colorsItem: Colors.black,
     ),
     ItemModel(
-      headerItem: 'flutter',
+      headerItem:
+          "Pourquoi privilégier votre système a celui d'un système conventionnel ?",
+      discription:
+          "Android is a mobile operating system based on a modified version of the Linux kernel and other open source software, designed primarily for touchscreen mobile devices such as smartphones and tablets. ... Some well known derivatives include Android TV for televisions and Wear OS for wearables, both developed by Google.",
+      colorsItem: Colors.green,
+    ),
+    ItemModel(
+      headerItem:
+          "Pourquoi privilégier votre système a celui d'un système conventionnel ?",
+      discription:
+          "Android is a mobile operating system based on a modified version of the Linux kernel and other open source software, designed primarily for touchscreen mobile devices such as smartphones and tablets. ... Some well known derivatives include Android TV for televisions and Wear OS for wearables, both developed by Google.",
+      colorsItem: Colors.green,
+    ),
+    ItemModel(
+      headerItem:
+          "Pourquoi privilégier votre système a celui d'un système conventionnel ?",
       discription:
           "Android is a mobile operating system based on a modified version of the Linux kernel and other open source software, designed primarily for touchscreen mobile devices such as smartphones and tablets. ... Some well known derivatives include Android TV for televisions and Wear OS for wearables, both developed by Google.",
       colorsItem: Colors.green,
