@@ -50,20 +50,21 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCR5uY3BelDgR9l8_xHZL-HP6X2KoY5Y3Y',
-    appId: '1:707836199942:android:6d88c1566f1f1b8ef36f87',
-    messagingSenderId: '707836199942',
-    projectId: 'alphaprojet-a91be',
-    storageBucket: 'alphaprojet-a91be.appspot.com',
+    apiKey: 'AIzaSyCzB0gnJtBizHrpz1rEnCr0tqAq5YmRh1Q',
+    appId: '1:730322868622:android:807a8662d10cacc67d2cdf',
+    messagingSenderId: '730322868622',
+    projectId: 'alpha-project-ce3c9',
+    storageBucket: 'alpha-project-ce3c9.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyA3zui0RsY-aWnl_O3zOfrFjQ4-5j55tjg',
-    appId: '1:707836199942:ios:2c91f2ac99a80e4bf36f87',
-    messagingSenderId: '707836199942',
-    projectId: 'alphaprojet-a91be',
-    storageBucket: 'alphaprojet-a91be.appspot.com',
-    iosClientId: '707836199942-lvg2kt4s4bdkq27lmt0nc4mq4gmj6o5s.apps.googleusercontent.com',
+    apiKey: 'AIzaSyDlYyevQc4X0nvjyWkkjmNoNLmy3x2ygf0',
+    appId: '1:730322868622:ios:96d6868e145487837d2cdf',
+    messagingSenderId: '730322868622',
+    projectId: 'alpha-project-ce3c9',
+    storageBucket: 'alpha-project-ce3c9.appspot.com',
+    androidClientId: '730322868622-iqk93ulfbdhgj78ud33tq3v4ll5fjdrc.apps.googleusercontent.com',
+    iosClientId: '730322868622-9vrulvbkshlfd1ohilsfu88s09cql0ns.apps.googleusercontent.com',
     iosBundleId: 'com.example.alphaV1',
   );
 }

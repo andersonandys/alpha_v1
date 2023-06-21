@@ -16,10 +16,6 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final FirebaseAuth _controllerFirebase = FirebaseAuth.instance;
-
   bool seePassword = false;
   final appControler = Get.put(AppControler());
   @override
@@ -49,7 +45,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             child: (appControler.localPath.value.isEmpty)
                                 ? const CircleAvatar(
                                     radius: 40,
-                                    // backgroundImage: AssetImage("assetName"),
+                                    backgroundImage:
+                                        AssetImage("assets/default.jpeg"),
                                   )
                                 : CircleAvatar(
                                     radius: 40,

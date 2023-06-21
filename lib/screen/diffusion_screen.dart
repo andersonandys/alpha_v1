@@ -1,15 +1,17 @@
 import 'dart:async';
 
 import 'package:alpha/controllers/app_controler.dart';
+import 'package:alpha/screen/dashboard_screen.dart';
 import 'package:alpha/screen/widgets/view_percente.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DiffusionScreen extends StatefulWidget {
-  const DiffusionScreen({Key? key}) : super(key: key);
-
+  DiffusionScreen({Key? key, required this.idDiffusion}) : super(key: key);
+  String idDiffusion;
   @override
   _DiffusionScreenState createState() => _DiffusionScreenState();
 }
@@ -19,20 +21,43 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
   int totalDuration = 0;
   int currentPosition = 0;
   final appController = Get.put(AppControler());
-  int currentMusicIndex = 0;
+  int currentMusicIndex = 1;
   late DateTime startTime;
   Duration duration = const Duration(hours: 5);
   late Timer _timer;
+
   int _countdown = 120; // 15 minutes en secondes
+  late final Stream<QuerySnapshot> streamDiffusion = FirebaseFirestore.instance
+      .collection("diffusion")
+      .doc(widget.idDiffusion)
+      .collection("child")
+      .orderBy("range", descending: false)
+      .snapshots();
+  late SharedPreferences prefs;
   @override
   void initState() {
     super.initState();
+    // print(currentMusicIndex);
+    // print("la valeur initiale");
+    // if (prefs.getInt("numberDiffus") == 0) {
+    //   print("current est 0");
+    // } else {
+    //   setState(() {
+    //     currentMusicIndex = prefs.getInt("numberDiffus")!;
+    //   });
+    //   print("new valeur");
+    // }
     startTime = DateTime.now();
+    initializeSharedPreferences();
     playMusic();
   }
 
+  Future<void> initializeSharedPreferences() async {
+    prefs = await SharedPreferences.getInstance();
+  }
+
   void startTimer() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         if (_countdown > 0) {
           _countdown--;
@@ -59,10 +84,11 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
 
   Future<void> playMusic() async {
     if (appController.isPlaying.isTrue) return;
-    String filePath = 'm2.mp3';
+    String filePath = "test-bach-wtk-1.wav";
     appController.isPlaying.value = true;
     audioPlayer.play(AssetSource(filePath));
     audioPlayer.onDurationChanged.listen((duration) {
+      prefs.setInt("numberDiffus", 0);
       setState(() {
         totalDuration = duration.inMilliseconds;
       });
@@ -75,26 +101,32 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
     });
 
     audioPlayer.onPlayerComplete.listen((event) {
-      print("La musique a fini de jouer");
-      continu();
+      print(currentMusicIndex);
+
+      setState(() {
+        currentMusicIndex++;
+      });
+      prefs.setInt("numberDiffus", currentMusicIndex);
+      prefs.reload();
+      appController.updateDiffusion(currentMusicIndex);
+      nextMusic();
     });
   }
 
-  continu() async {
-    print(currentMusicIndex);
+  nextMusic() async {
     appController.percentageMusic.value = 0;
     appController.isPlaying.value = false;
     setState(() {
-      currentMusicIndex++;
       currentPosition = 0;
       totalDuration = 0;
     });
     startTimer();
-    Future.delayed(const Duration(minutes: 2), () {
-      currentMusicIndex++; // Passer à la musique suivante
 
+    Future.delayed(const Duration(minutes: 2), () {
       if (DateTime.now().difference(startTime) < duration) {
         // Appeler playMusic() pour lancer la musique suivante
+        final int? counter = prefs.getInt('numberDiffus');
+        print(counter! + 1);
         playMusic();
       }
     });
@@ -102,9 +134,13 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
 
   @override
   void dispose() {
-    _timer.cancel();
+    _cancelTimer();
     audioPlayer.stop();
     super.dispose();
+  }
+
+  void _cancelTimer() {
+    _timer.cancel();
   }
 
   @override
@@ -112,6 +148,16 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        leading: IconButton(
+            onPressed: () {
+              audioPlayer.stop();
+              _cancelTimer();
+              Navigator.of(context).pop();
+            },
+            icon: const Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+            )),
         backgroundColor: Colors.green,
         title: const Text(
           'Diffusion',
@@ -119,132 +165,178 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
         ),
         centerTitle: true,
       ),
-      body: Container(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Expanded(
-                child: Column(
-              children: <Widget>[
-                const SizedBox(
-                  height: 20,
-                ),
-                (appController.isPlaying.isTrue)
-                    ? const Text(
-                        "Votre diffusion est en cours",
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.w600),
-                      )
-                    : Text(
-                        'Votre prochaine diffusion reprend dans ${formatTime(_countdown)}',
-                        style: const TextStyle(fontSize: 20),
-                        textAlign: TextAlign.center,
-                      ),
-                const SizedBox(
-                  height: 50,
-                ),
-                Container(
-                  height: 250,
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                      color: Colors.green,
-                      borderRadius: BorderRadius.circular(30)),
-                  child: StreamBuilder<int>(
-                    stream: Stream.periodic(const Duration(milliseconds: 200),
-                        (_) => currentPosition),
-                    builder:
-                        (BuildContext context, AsyncSnapshot<int> snapshot) {
-                      double progress = totalDuration != 0
-                          ? currentPosition.toDouble() /
-                              totalDuration.toDouble()
-                          : 0;
+      body: Obx(() => Container(
+            padding: const EdgeInsets.all(20),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  (appController.isPlaying.isTrue)
+                      ? const Text(
+                          "Votre diffusion est en cours",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.w600),
+                        )
+                      : Text(
+                          'Votre prochaine diffusion reprend dans ${formatTime(_countdown)}',
+                          style: const TextStyle(fontSize: 20),
+                          textAlign: TextAlign.center,
+                        ),
+                  const SizedBox(
+                    height: 50,
+                  ),
+                  Container(
+                    height: 250,
+                    width: MediaQuery.of(context).size.width,
+                    decoration: BoxDecoration(
+                        color: Colors.green,
+                        borderRadius: BorderRadius.circular(30)),
+                    child: StreamBuilder<int>(
+                      stream: Stream.periodic(const Duration(milliseconds: 200),
+                          (_) => currentPosition),
+                      builder:
+                          (BuildContext context, AsyncSnapshot<int> snapshot) {
+                        double progress = totalDuration != 0
+                            ? currentPosition.toDouble() /
+                                totalDuration.toDouble()
+                            : 0;
 
-                      appController.percentageMusic.value =
-                          progress.isFinite ? (progress * 100).toInt() : 0;
-                      ;
-                      return ViewPercente();
+                        appController.percentageMusic.value =
+                            progress.isFinite ? (progress * 100).toInt() : 0;
+
+                        return ViewPercente();
+                      },
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 50,
+                  ),
+                  StreamBuilder(
+                    stream: streamDiffusion,
+                    builder: (BuildContext context,
+                        AsyncSnapshot<QuerySnapshot> snapshot) {
+                      if (!snapshot.hasData) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      } else if (snapshot.connectionState ==
+                          ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                      var dataDif = snapshot.data!.docs;
+                      var length = snapshot.data!.docs.length;
+                      for (var element in dataDif) {
+                        element["niveau"];
+                        if (element["statut"] == "A venir") {
+                          if (appController.idChild.contains(element.id)) {
+                          } else {
+                            appController.idChild.add(element.id);
+                          }
+                        }
+                      }
+                      return Column(
+                        children: <Widget>[
+                          const Text(
+                            'Historique du  17 Juin 2023 ',
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.w500),
+                          ),
+                          ListView.builder(
+                              physics: const NeverScrollableScrollPhysics(),
+                              shrinkWrap: true,
+                              itemCount: length,
+                              itemBuilder: (context, index) {
+                                return Column(
+                                  children: <Widget>[
+                                    const SizedBox(
+                                      height: 20,
+                                    ),
+                                    ListTile(
+                                      contentPadding: const EdgeInsets.all(0),
+                                      title: Text(
+                                        'Diffusion ${dataDif[index]["niveau"]}/$length ',
+                                        style: const TextStyle(
+                                            fontSize: 20,
+                                            color: Colors.black54),
+                                      ),
+                                      trailing: (currentMusicIndex ==
+                                              dataDif[index]["niveau"])
+                                          ? const Text(
+                                              'En diffusion',
+                                              style: TextStyle(
+                                                  fontSize: 20,
+                                                  color: Colors.orange),
+                                            )
+                                          : Text(
+                                              "${dataDif[index]["statut"]}",
+                                              style: TextStyle(
+                                                  fontSize: 20,
+                                                  color: (dataDif[index]
+                                                              ["statut"] ==
+                                                          "A venir")
+                                                      ? Colors.black54
+                                                      : (dataDif[index]
+                                                                  ["statut"] ==
+                                                              "Succēs")
+                                                          ? Colors.green
+                                                          : Colors.red),
+                                            ),
+                                    ),
+                                  ],
+                                );
+                              })
+                        ],
+                      );
                     },
                   ),
-                ),
-                const SizedBox(
-                  height: 50,
-                ),
-                const Column(
-                  children: <Widget>[
-                    Text(
-                      'Historique du  17 Juin 2023 ',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    ListTile(
-                      contentPadding: EdgeInsets.all(0),
-                      title: Text(
-                        'Diffusion 1/3',
-                        style: TextStyle(fontSize: 20, color: Colors.black54),
-                      ),
-                      trailing: Text(
-                        'Succēs',
-                        style: TextStyle(fontSize: 20, color: Colors.black54),
-                      ),
-                    ),
-                    ListTile(
-                      contentPadding: EdgeInsets.all(0),
-                      title: Text(
-                        'Diffusion 2/3',
-                        style: TextStyle(fontSize: 20, color: Colors.green),
-                      ),
-                      trailing: Text(
-                        'En cours',
-                        style: TextStyle(fontSize: 20, color: Colors.green),
+                  ElevatedButton(
+                    onPressed: () {
+                      print(prefs.getInt("numberDiffus"));
+                      // if (appController.isPlaying.isTrue) {
+                      //   // avertissement
+                      // } else {
+                      //   if (currentMusicIndex < 4) {
+                      //     appController.messageSucces(
+                      //         "Vous ne pouvez pas quitter la diffusion");
+                      //   } else {
+                      //     Navigator.push(
+                      //       context,
+                      //       MaterialPageRoute<void>(
+                      //         builder: (BuildContext context) =>
+                      //             const DashboardScreen(),
+                      //       ),
+                      //     );
+                      //   }
+                      // }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: (currentMusicIndex < 4)
+                          ? Colors.grey
+                          : Colors.green, // Texte en blanc
+                      minimumSize:
+                          const Size(double.infinity, 60), // Hauteur du bouton
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10), // Rayon de 10
                       ),
                     ),
-                    ListTile(
-                      contentPadding: EdgeInsets.all(0),
-                      title: Text(
-                        'Diffusion 3/3',
-                        style: TextStyle(fontSize: 20, color: Colors.black54),
-                      ),
-                      trailing: Text(
-                        'Avenir',
-                        style: TextStyle(fontSize: 20, color: Colors.black54),
-                      ),
-                    )
-                  ],
-                ),
-              ],
-            )),
-            ElevatedButton(
-              onPressed: () {
-                // Action pour le bouton d'inscription
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //     builder: (context) => const RegisterScreen(),
-                //   ),
-                // );
-              },
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Colors.green, // Texte en blanc
-                minimumSize:
-                    const Size(double.infinity, 60), // Hauteur du bouton
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10), // Rayon de 10
-                ),
-              ),
-              child: const Text(
-                "Terminer",
-                style: TextStyle(fontSize: 20),
+                    child: const Text(
+                      "Terminer",
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
+          )),
     );
   }
 }

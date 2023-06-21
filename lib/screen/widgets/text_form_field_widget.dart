@@ -5,9 +5,12 @@ class TextFormFieldwidget extends StatelessWidget {
   final String? hintText;
   final Widget? prefixIcon;
   final Widget? suffixIcon;
+  final int minLines;
+  final int maxLines;
   final String? Function(String?)? validator;
   final void Function(String?)? onSaved;
   final bool obscureText;
+  final TextEditingController? controller;
 
   const TextFormFieldwidget({
     this.label,
@@ -16,17 +19,23 @@ class TextFormFieldwidget extends StatelessWidget {
     this.suffixIcon,
     this.validator,
     this.onSaved,
+    this.maxLines = 1,
+    this.minLines = 1,
     this.obscureText = false,
     super.key,
+    this.controller,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       // autofocus: false,
+      controller: controller,
       obscureText: obscureText,
       validator: validator,
       onSaved: onSaved,
+      minLines: minLines,
+      maxLines: maxLines,
       decoration: InputDecoration(
         labelText: label,
         hintText: hintText,

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:alpha/constants/app_constants.dart';
 import 'package:alpha/models/user_model.dart';
 import 'package:alpha/screen/dashboard_screen.dart';
+import 'package:alpha/screen/diffusion_screen.dart';
 import 'package:alpha/screen/onboarding_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ficonsax/ficonsax.dart';
@@ -27,6 +28,10 @@ class AppControler extends GetxController {
   Rx<TextEditingController> password = TextEditingController().obs;
   Rx<TextEditingController> passwordConfitm = TextEditingController().obs;
   Rx<TextEditingController> resetPasswords = TextEditingController().obs;
+  Rx<TextEditingController> numberuser = TextEditingController().obs;
+  Rx<TextEditingController> nomfeed = TextEditingController().obs;
+  Rx<TextEditingController> mailfeed = TextEditingController().obs;
+  Rx<TextEditingController> messagefeed = TextEditingController().obs;
   final FirebaseFirestore _instancefirestore = FirebaseFirestore.instance;
 
   //  final FirebaseStorage firebase_storage = FirebaseStorage.instance;
@@ -47,6 +52,9 @@ class AppControler extends GetxController {
   var urlfile = "".obs;
   var upload = false.obs;
   var typefile = "".obs;
+  var isload = false.obs;
+  var idDiffusion = "".obs;
+  var idChild = [].obs;
   checkAuth() {
     if (_auth.currentUser != null) {
       userlLogin.value = true;
@@ -271,6 +279,19 @@ class AppControler extends GetxController {
     print(typefile.value);
   }
 
+  changeavatar() async {
+    FilePickerResult? result =
+        await FilePicker.platform.pickFiles(type: FileType.image);
+
+    if (result != null) {
+      File file = File(result.files.single.path!);
+      localPath.value = result.files.single.path!;
+      base64File.value = base64Encode(file.readAsBytesSync());
+      isload.value = true;
+    }
+    uploadFileToFirebaseStorage("image");
+  }
+
   Future<void> uploadFileToFirebaseStorage(typemedia) async {
     String childstrorage = "";
     String contentype = "";
@@ -297,6 +318,13 @@ class AppControler extends GetxController {
     firebase_storage.TaskSnapshot taskSnapshot =
         await uploadTask.whenComplete(() => null);
     String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+    if (isload.isTrue) {
+      _instancefirestore
+          .collection(AppConstants.collectionUsersFS)
+          .doc(_auth.currentUser!.uid)
+          .update({"avatar": downloadUrl}).then(
+              (value) => isload.value = false);
+    }
     urlfile.value = downloadUrl;
   }
 
@@ -370,20 +398,152 @@ class AppControler extends GetxController {
     }
   }
 
-  updateDiffusion(numberDiffusion, idDiffusion) async {
+  updateDiffusion(int numberDiffusion) async {
+    print('ajoute a la bdd');
+
+    print(numberDiffusion);
+    print("la valeu");
+    _instancefirestore
+        .collection(AppConstants.collectionDiffusionFS)
+        .doc(idDiffusion.value)
+        .collection("child")
+        .doc(idChild[numberDiffusion])
+        .update({"statut": "Succēs"}).then(
+            (value) => idChild.remove(idChild[numberDiffusion]));
+  }
+
+  updateUser() async {
+    print("object");
+    if (nomUser.value.text.isNotEmpty) {
+      _instancefirestore
+          .collection(AppConstants.collectionUsersFS)
+          .doc(_auth.currentUser!.uid)
+          .update({"nomuser": nomUser.value.text}).then(
+              (value) => nomUser.value.clear());
+    } else {
+      print("vide");
+    }
+    if (mailUser.value.text.isNotEmpty) {
+      _instancefirestore
+          .collection(AppConstants.collectionUsersFS)
+          .doc(_auth.currentUser!.uid)
+          .update({"mailuser": mailUser.value.text}).then(
+              (value) => mailUser.value.clear());
+    }
+    if (numberuser.value.text.isNotEmpty) {
+      _instancefirestore
+          .collection(AppConstants.collectionUsersFS)
+          .doc(_auth.currentUser!.uid)
+          .update({"numero": numberuser.value.text}).then(
+              (value) => numberuser.value.clear());
+    }
+    if (password.value.text.isNotEmpty) {
+      try {
+        User? user = FirebaseAuth.instance.currentUser;
+
+        if (user != null) {
+          await user.updatePassword(password.value.text);
+        }
+      } catch (e) {
+        messageError('Erreur lors de la mise à jour du mot de passe');
+      }
+    }
+    if (nomUser.value.text.isNotEmpty ||
+        mailUser.value.text.isNotEmpty ||
+        numberuser.value.text.isNotEmpty ||
+        password.value.text.isNotEmpty) {
+      messageSucces("Mise a jour effectue avec succes");
+    }
+  }
+
+  diffusionverif(context) async {
     QuerySnapshot q = await _instancefirestore
         .collection(AppConstants.collectionDiffusionFS)
         .where('iduser', isEqualTo: _auth.currentUser!.uid)
         .where("date",
-            isNotEqualTo: "${DateTime.now().day}/${DateTime.now().month}")
+            isEqualTo: "${DateTime.now().day}/${DateTime.now().month}")
         .get();
-    if (q.docs.length != 1) {
+
+    if (q.docs.length == 1) {
+      print("existe");
+    } else {
+      print("existe pas");
+    }
+    if (q.docs.length == 1) {
+      // redirection vers le dashboard
+      idDiffusion.value = q.docs.first.id;
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (BuildContext context) => DiffusionScreen(
+              idDiffusion: q.docs.first.id,
+            ),
+          ));
+    } else {
+      //  creation des differents diffusions
+      var dataDiffusion = {
+        "iduser": _auth.currentUser!.uid,
+        "nbreDiffusion": 4,
+        "date": "${DateTime.now().day}/${DateTime.now().month}",
+        "dateComplet":
+            "${DateTime.now().day} ${DateTime.now().month} ${DateTime.now().year}",
+        "range": DateTime.now().millisecondsSinceEpoch
+      };
       _instancefirestore
           .collection(AppConstants.collectionDiffusionFS)
-          .doc(idDiffusion)
-          .update({"diffusion.0": ""});
-    } else {
-      // redirection dashboard
+          .add(dataDiffusion)
+          .then((value) {
+        idDiffusion.value = value.id;
+        for (var i = 1; i < 5; i++) {
+          var dataChildDiffusion = {
+            "urlaudio": "",
+            "statut": "A venir",
+            "idDiffusion": value.id,
+            "range": DateTime.now().millisecondsSinceEpoch,
+            "niveau": i
+          };
+          _instancefirestore
+              .collection(AppConstants.collectionDiffusionFS)
+              .doc(value.id)
+              .collection("child")
+              .add(dataChildDiffusion);
+          if (i == 4) {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (BuildContext context) => DiffusionScreen(
+                    idDiffusion: value.id,
+                  ),
+                ));
+          }
+        }
+      });
     }
+  }
+
+  sendFeedback(context) {
+    if (nomfeed.value.text.isEmpty) {
+      messageError("Nous vous prions de saisir votre nom");
+      buttonController.value.reset();
+    } else if (mailfeed.value.text.isEmpty) {
+      messageError("Nous vous prions de saisir votre adresse e-mail");
+      buttonController.value.reset();
+    } else if (messagefeed.value.text.isEmpty) {
+      messageError("Nous vous prions de saisir un message");
+      buttonController.value.reset();
+    } else {
+      var datafeed = {
+        "nom": nomfeed.value.text,
+        "email": mailfeed.value.text,
+        "message": messagefeed.value.text,
+        "iduser": _auth.currentUser!.uid,
+        "date": DateTime.now()
+      };
+      _instancefirestore
+          .collection(AppConstants.collectionfeedbackFS)
+          .add(datafeed);
+    }
+    messageSucces("votre avis a été pris envoye");
+    buttonController.value.reset();
   }
 }

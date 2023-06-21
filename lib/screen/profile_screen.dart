@@ -40,53 +40,29 @@ class ProfileScreen extends StatelessWidget {
               _titltText("Votre nom"),
               const SizedBox(height: 10),
               TextFormFieldwidget(
+                controller: appControler.nomUser.value,
                 hintText: "David Axel",
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return "Veuillez entrer votre nom";
-                  }
-                  return null;
-                },
-                onSaved: (value) {},
               ),
               const SizedBox(height: 20),
               _titltText("Adresse e-mail"),
               const SizedBox(height: 10),
               TextFormFieldwidget(
                 hintText: "daniel@kameni.me",
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return "Veuillez entrer votre nom";
-                  }
-                  return null;
-                },
-                onSaved: (value) {},
+                controller: appControler.mailUser.value,
               ),
               const SizedBox(height: 20),
               _titltText("Numero de telephone"),
               const SizedBox(height: 10),
               TextFormFieldwidget(
                 hintText: "+1 234 567 890",
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return "Veuillez entrer votre nom";
-                  }
-                  return null;
-                },
-                onSaved: (value) {},
+                controller: appControler.numberuser.value,
               ),
               const SizedBox(height: 20),
               _titltText("Mot de passe"),
               const SizedBox(height: 10),
               TextFormFieldwidget(
                 hintText: "*********",
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return "Veuillez entrer votre nom";
-                  }
-                  return null;
-                },
-                onSaved: (value) {},
+                controller: appControler.password.value,
               ),
               const Spacer(),
               TextButton(
@@ -100,7 +76,9 @@ class ProfileScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  appControler.updateUser();
+                },
                 child: const Text(
                   "Mettre a jour",
                   style: TextStyle(

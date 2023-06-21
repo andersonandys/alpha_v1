@@ -1,3 +1,4 @@
+import 'package:alpha/screen/dashboard_screen.dart';
 import 'package:alpha/screen/home_noconnect_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_onboarding_slider/flutter_onboarding_slider.dart';
@@ -19,7 +20,7 @@ class _OnboardingState extends State<Onboarding> {
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
-            builder: (context) => const HomeNoconnectScreen(),
+            builder: (context) => const DashboardScreen(),
           ),
           (route) => false,
         );
