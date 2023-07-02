@@ -148,6 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 30),
                   ComponentButtonForm(
+                    buttonColor: const Color(0xFF79AD57),
                     label: "Se connecter",
                     onPressed: () async {
                       FocusScope.of(context).unfocus();
@@ -208,7 +209,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               // Action à effectuer lors du clic sur le bouton
                             },
                             child: const Text(
-                              'Google Mail',
+                              'Google E-Mail',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,

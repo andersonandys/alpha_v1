@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -7,6 +8,10 @@ class Faq_screen extends StatefulWidget {
 }
 
 class _Faq_screenState extends State<Faq_screen> {
+  final Stream<QuerySnapshot> faqtream = FirebaseFirestore.instance
+      .collection("faq")
+      .orderBy("range", descending: true)
+      .snapshots();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,57 +23,75 @@ class _Faq_screenState extends State<Faq_screen> {
       ),
       body: Container(
         padding: const EdgeInsets.all(30),
-        child: ListView.builder(
-          itemCount: itemData.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 30),
-              child: ExpansionPanelList(
-                animationDuration: const Duration(milliseconds: 1000),
-                dividerColor: Colors.red,
-                elevation: 1,
-                children: [
-                  ExpansionPanel(
-                    backgroundColor: Color(0xFFF4F5F9),
-                    body: Container(
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10)),
-                      padding: const EdgeInsets.all(10),
-                      child: Text(
-                        itemData[index].discription,
-                        style: TextStyle(
-                            color: Colors.grey[700],
-                            fontSize: 15,
-                            letterSpacing: 0.3,
-                            height: 1.3),
-                      ),
-                    ),
-                    headerBuilder: (BuildContext context, bool isExpanded) {
-                      return Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10)),
-                        margin: const EdgeInsets.only(bottom: 30),
-                        padding: const EdgeInsets.all(10),
-                        child: Text(
-                          itemData[index].headerItem,
-                          textAlign: TextAlign.left,
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
+        child: StreamBuilder(
+          stream: faqtream,
+          builder:
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (!snapshot.hasData) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            } else if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            var length = snapshot.data!.docs.length;
+            return ListView.builder(
+              itemCount: length,
+              itemBuilder: (BuildContext context, int index) {
+                var dataFaq = snapshot.data!.docs[index];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 30),
+                  child: ExpansionPanelList(
+                    animationDuration: const Duration(milliseconds: 1000),
+                    dividerColor: Colors.red,
+                    elevation: 1,
+                    children: [
+                      ExpansionPanel(
+                        backgroundColor: Color(0xFFF4F5F9),
+                        body: Container(
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10)),
+                          padding: const EdgeInsets.all(10),
+                          child: Text(
+                            dataFaq["contenu"],
+                            textAlign: TextAlign.justify,
+                            style: TextStyle(
+                                color: Colors.grey[700],
+                                fontSize: 15,
+                                letterSpacing: 0.3,
+                                height: 1.3),
                           ),
                         ),
-                      );
+                        headerBuilder: (BuildContext context, bool isExpanded) {
+                          return Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10)),
+                            margin: const EdgeInsets.only(bottom: 30),
+                            padding: const EdgeInsets.all(10),
+                            child: Text(
+                              dataFaq["titre"],
+                              textAlign: TextAlign.left,
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                          );
+                        },
+                        isExpanded: itemData[index].expanded,
+                      )
+                    ],
+                    expansionCallback: (int item, bool status) {
+                      setState(() {
+                        itemData[index].expanded = !itemData[index].expanded;
+                      });
                     },
-                    isExpanded: itemData[index].expanded,
-                  )
-                ],
-                expansionCallback: (int item, bool status) {
-                  setState(() {
-                    itemData[index].expanded = !itemData[index].expanded;
-                  });
-                },
-              ),
+                  ),
+                );
+              },
             );
           },
         ),

@@ -25,44 +25,58 @@ class _HomeNoconnectScreenState extends State<HomeNoconnectScreen> {
             color: Colors.white.withOpacity(0.5),
             child: Column(
               children: <Widget>[
-                const Expanded(
-                    child: SizedBox(
-                  child: Column(
+                Expanded(
+                    child: Container(
+                  padding: const EdgeInsets.only(top: 100, left: 70, right: 70),
+                  width: MediaQuery.of(context).size.width,
+                  child: const Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.only(top: 100),
-                        child: Text(
-                          'Bienvenue sur \n Alpha',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontSize: 40,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black),
-                        ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            'Bienvenue sur',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black),
+                          ),
+                          Text(
+                            'Alpha',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black),
+                          )
+                        ],
                       ),
                     ],
                   ),
                 )),
                 const Expanded(
                     child: Padding(
-                  padding: EdgeInsets.all(20),
+                  padding: EdgeInsets.only(left: 70, right: 70),
                   child: Column(
                     children: <Widget>[
-                      Column(
-                        children: <Widget>[
-                          Text(
-                            "Augmentez jusqu'à 30% votre production grâce à de l'engrais numerique ",
-                            textAlign: TextAlign.justify,
-                            style: TextStyle(
-                                fontSize: 25,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black),
-                          ),
-                          Text(
-                            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
-                            style: TextStyle(fontSize: 16, color: Colors.black),
-                          )
-                        ],
+                      Text(
+                        "Augmentez jusqu'à 30% votre production grâce à de l'engrais numerique ",
+                        textAlign: TextAlign.justify,
+                        style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black),
+                      ),
+                      SizedBox(
+                        height: 30,
+                      ),
+                      Text(
+                        "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
+                        style: TextStyle(fontSize: 16, color: Colors.black54),
                       )
                     ],
                   ),
@@ -88,7 +102,7 @@ class _HomeNoconnectScreenState extends State<HomeNoconnectScreen> {
                             backgroundColor:
                                 Colors.transparent, // Texte en blanc
                             side: const BorderSide(
-                                color: Colors.white,
+                                color: Colors.black,
                                 width: 1), // Bordure blanche
                             minimumSize: const Size(
                                 double.infinity, 60), // Hauteur du bouton
@@ -117,7 +131,8 @@ class _HomeNoconnectScreenState extends State<HomeNoconnectScreen> {
                           },
                           style: ElevatedButton.styleFrom(
                             foregroundColor: Colors.white,
-                            backgroundColor: Colors.green, // Texte en blanc
+                            backgroundColor:
+                                const Color(0xFF79AD57), // Texte en blanc
                             minimumSize: const Size(
                                 double.infinity, 60), // Hauteur du bouton
                             shape: RoundedRectangleBorder(

@@ -41,6 +41,7 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
   void initState() {
     super.initState();
     appController.getuserData();
+    appController.createNotification("Votre diffusion vient de commencer");
     // print(currentMusicIndex);
     // print("la valeur initiale");
     // if (prefs.getInt("numberDiffus") == 0) {
@@ -159,7 +160,7 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
               Icons.arrow_back,
               color: Colors.white,
             )),
-        backgroundColor: Colors.green,
+        backgroundColor: const Color(0XFF79AD57),
         title: const Text(
           'Diffusion',
           style: TextStyle(color: Colors.white, fontSize: 25),
@@ -193,10 +194,10 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
                     height: 30,
                   ),
                   Container(
-                    height: 250,
+                    height: 230,
                     width: MediaQuery.of(context).size.width,
                     decoration: BoxDecoration(
-                        color: Colors.green,
+                        color: const Color(0XFF79AD57),
                         borderRadius: BorderRadius.circular(30)),
                     child: StreamBuilder<int>(
                       stream: Stream.periodic(const Duration(milliseconds: 200),
@@ -286,6 +287,7 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
                                           : Text(
                                               "${dataDif[index]["statut"]}",
                                               style: TextStyle(
+                                                  fontWeight: FontWeight.w700,
                                                   fontSize: 20,
                                                   color: (dataDif[index]
                                                               ["statut"] ==
@@ -294,7 +296,8 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
                                                       : (dataDif[index]
                                                                   ["statut"] ==
                                                               "Succēs")
-                                                          ? Colors.green
+                                                          ? const Color(
+                                                              0XFF79AD57)
                                                           : Colors.red),
                                             ),
                                     ),
@@ -331,7 +334,7 @@ class _DiffusionScreenState extends State<DiffusionScreen> {
                       backgroundColor:
                           (appController.currentMusicIndex.value < 4)
                               ? Colors.grey
-                              : Colors.green, // Texte en blanc
+                              : const Color(0XFF79AD57), // Texte en blanc
                       minimumSize:
                           const Size(double.infinity, 60), // Hauteur du bouton
                       shape: RoundedRectangleBorder(

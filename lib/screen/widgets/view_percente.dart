@@ -41,7 +41,7 @@ class _ViewPercenteState extends State<ViewPercente> {
                 TextSpan(
                     text: (appController.isPlaying.value == true)
                         ? 'En cours'
-                        : 'Terminée',
+                        : 'En attente',
                     style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,

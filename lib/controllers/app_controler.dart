@@ -8,6 +8,7 @@ import 'package:alpha/screen/diffusion_screen.dart';
 import 'package:alpha/screen/onboarding_screen.dart';
 import 'package:alpha/screen/succesdiffusion_screen.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ficonsax/ficonsax.dart';
 import 'package:file_picker/file_picker.dart';
@@ -34,7 +35,18 @@ class AppControler extends GetxController {
   Rx<TextEditingController> nomfeed = TextEditingController().obs;
   Rx<TextEditingController> mailfeed = TextEditingController().obs;
   Rx<TextEditingController> messagefeed = TextEditingController().obs;
+  Rx<TextEditingController> faqtitre = TextEditingController().obs;
+  Rx<TextEditingController> faqcontenu = TextEditingController().obs;
   final FirebaseFirestore _instancefirestore = FirebaseFirestore.instance;
+
+  var card1 = "".obs;
+  var card2 = "".obs;
+  var card3 = "".obs;
+  var paragraphe1 = "".obs;
+  var lancement = "".obs;
+  var historique = "".obs;
+  var feedback = "".obs;
+  var faq = "".obs;
   var namuserInfo = "".obs;
   var mailuserInfo = "".obs;
   var audioPlayer = AudioPlayer().obs;
@@ -61,6 +73,13 @@ class AppControler extends GetxController {
   var idDiffusion = "".obs;
   var idChild = [].obs;
   var currentMusicIndex = 1.obs;
+  @override
+  void onInit() {
+    // TODO: implement onInit
+    super.onInit();
+    getlangue();
+  }
+
   checkAuth() {
     if (_auth.currentUser != null) {
       userlLogin.value = true;
@@ -114,6 +133,7 @@ class AppControler extends GetxController {
         email: mailUser.value.text,
         password: password.value.text,
       );
+      _auth.currentUser!.sendEmailVerification();
       var datauser = {
         "nomuser": nomUser.value.text,
         "mailuser": mailUser.value.text,
@@ -214,11 +234,12 @@ class AppControler extends GetxController {
           email: mailUser.value.text,
           password: password.value.text,
         );
+
         mailUser.value.clear();
         password.value.clear();
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const Onboarding()),
+          MaterialPageRoute(builder: (context) => const DashboardScreen()),
           (route) => false,
         );
       } on FirebaseAuthException catch (e) {
@@ -588,5 +609,66 @@ class AppControler extends GetxController {
     }
     messageSucces("votre avis a été pris envoye");
     buttonController.value.reset();
+  }
+
+  addfaq() {
+    if (faqtitre.value.text.isEmpty) {
+      messageError("Saisissez un titre");
+      buttonController.value.reset();
+    } else if (faqcontenu.value.text.isEmpty) {
+      messageError("Saisissez un contenu");
+      buttonController.value.reset();
+    } else {
+      var data = {
+        "titre": faqtitre.value.text,
+        "contenu": faqcontenu.value.text,
+        "range": DateTime.now().millisecondsSinceEpoch
+      };
+      _instancefirestore.collection(AppConstants.collectionfaqFS).add(data);
+      messageSucces("Faq ajoute avec sucess");
+      faqcontenu.value.clear();
+      faqtitre.value.clear();
+      buttonController.value.reset();
+    }
+  }
+
+  deletefaq(idelete) {
+    _instancefirestore
+        .collection(AppConstants.collectionfaqFS)
+        .doc(idelete)
+        .delete();
+    messageSucces("Element retire du FAQ");
+  }
+
+  void getlangue() {
+    _instancefirestore
+        .collection(AppConstants.collectionexpressionFS)
+        .snapshots()
+        .listen((querySnapshot) {
+      for (var element in querySnapshot.docs) {
+        card1.value = element["card1"];
+        card2.value = element["card2"];
+        card3.value = element["card3"];
+        paragraphe1.value = element["paragraphe1"];
+        lancement.value = element["lancement"];
+        historique.value = element["historique"];
+        feedback.value = element["feedback"];
+        faq.value = element["faq"];
+      }
+    });
+  }
+
+  void createNotification(message) {
+    // Configuration de la notification
+    var content = NotificationContent(
+      id: 0,
+      channelKey: 'basic_channel',
+      title: 'Notification pour la diffusion',
+      body: message,
+      notificationLayout: NotificationLayout.Default,
+    );
+
+    // Affichage de la notification
+    AwesomeNotifications().createNotification(content: content);
   }
 }

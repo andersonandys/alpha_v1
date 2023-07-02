@@ -1,4 +1,5 @@
 import 'package:alpha/controllers/app_controler.dart';
+import 'package:alpha/screen/culture_screen.dart';
 import 'package:alpha/screen/feedback_screen.dart';
 import 'package:alpha/screen/login_screen.dart';
 import 'package:alpha/screen/onboarding_screen.dart';
@@ -136,7 +137,9 @@ class _SettingScreenState extends State<SettingScreen> {
                         title: "Culture",
                         subTitle: "Tomate, Salade, Goyave",
                         icon: Icons.person_outlined,
-                        onTap: () {},
+                        onTap: () {
+                          Get.to(() => const CultureScreen());
+                        },
                       ),
                       const SizedBox(height: 20),
                       _buildListTile(
@@ -153,7 +156,7 @@ class _SettingScreenState extends State<SettingScreen> {
                         subTitle: "Afficher l'historique",
                         icon: Icons.person_outlined,
                         onTap: () {
-                          Get.to(() => FeedbackScreen());
+                          Get.to(() => const FeedbackScreen());
                         },
                       ),
                       const SizedBox(height: 20),
@@ -206,13 +209,13 @@ class _SettingScreenState extends State<SettingScreen> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.grey[200],
+              color: Colors.grey.shade100,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
               icon,
               size: 50,
-              color: Colors.green,
+              color: Color(0XFF79AD57),
             ),
           ),
           const SizedBox(width: 20),

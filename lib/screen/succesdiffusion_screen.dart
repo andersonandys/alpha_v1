@@ -1,5 +1,7 @@
+import 'package:alpha/controllers/app_controler.dart';
 import 'package:alpha/screen/dashboard_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class SuccesdiffusionScreen extends StatefulWidget {
   const SuccesdiffusionScreen({Key? key}) : super(key: key);
@@ -9,6 +11,14 @@ class SuccesdiffusionScreen extends StatefulWidget {
 }
 
 class _SuccesdiffusionScreenState extends State<SuccesdiffusionScreen> {
+  final appController = Get.put(AppControler());
+  @override
+  void initState() {
+    super.initState();
+    appController
+        .createNotification("Votre diffusion est terminée avec success");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
